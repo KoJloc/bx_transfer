@@ -20,8 +20,9 @@
 </template>
 
 <script>
+
 export default {
-    name: "Index",
+    name: "Table",
 
     data() {
         return {
@@ -35,16 +36,17 @@ export default {
 
     methods:{
         getPeople() {
-            axios.get('/api/people')
+            axios.post('/api/people')
                 .then( res => {
                     this.people = res.data
+                })
+                .catch(err => {
+                    console.log(err)
                 })
         }
     },
 
 }
-
-
 </script>
 
 <style scoped>

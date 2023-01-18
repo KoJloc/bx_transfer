@@ -24,7 +24,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     store: function store() {
-      axios.post('/api/people', {
+      axios.post('/api/people/create', {
         name: this.name,
         age: this.age,
         job: this.job

@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Person\DeleteController;
-use App\Http\Controllers\Person\IndexController;
+use App\Http\Controllers\Person\ShowController;
+use App\Http\Controllers\Person\TableController;
 use App\Http\Controllers\Person\StoreController;
 use App\Http\Controllers\Person\UpdateController;
 use Illuminate\Http\Request;
@@ -23,8 +24,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::group(['namespace' => 'Person', 'prefix' => 'people'], function () {
-    Route::get('/', [IndexController::class, '__invoke']);
-    Route::post('/', [StoreController::class, '__invoke']);
+    Route::post('/create', [StoreController::class, '__invoke']);
+    Route::post('/', [TableController::class, '__invoke']);
+    Route::get('/{person}', [ShowController::class, '__invoke']);
     Route::patch('/{person}', [UpdateController::class,'__invoke']);
     Route::delete('/{person}', [DeleteController::class,'__invoke']);
 });

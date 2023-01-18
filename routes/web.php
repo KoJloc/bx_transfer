@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 */
 Auth::routes();
 
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/home', [HomeController::class, 'index']);
 
 Route::get('/{page}', [IndexController::class, '__invoke'])->where('page', '.*');
 

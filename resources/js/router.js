@@ -8,24 +8,24 @@ export default new VueRouter({
     mode: 'history',
     routes: [
         {
-            path: '/persons', component:() => import('./components/Person/Index.vue'),
+            path: '/people',
+            component: () => import('./components/Person/Table.vue'),
             name: 'person.index'
         },
         {
-            path: '/create',
+            path: '/people/create',
             component: () => import('./components/Person/Create.vue'),
             name: 'person.create'
         },
         {
-            path: '/show',
-            component: function (){return import('./components/Person/Show.vue')},
-            name: 'person.show'
-        },
-
-        {
-            path: '/edit',
-            component: function (){return import('./components/Person/Edit.vue')},
+            path: '/people/:id/edit',
+            component: () => import('./components/Person/Edit.vue'),
             name: 'person.edit'
+        },
+        {
+            path: '/people/:id',
+            component: () => import('./components/Person/Show.vue'),
+            name: 'person.show'
         },
         ],
 })

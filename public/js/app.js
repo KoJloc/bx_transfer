@@ -5489,29 +5489,29 @@ vue__WEBPACK_IMPORTED_MODULE_0__["default"].use(vue_router__WEBPACK_IMPORTED_MOD
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   mode: 'history',
   routes: [{
-    path: '/persons',
+    path: '/people',
     component: function component() {
-      return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Index_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Index.vue */ "./resources/js/components/Person/Index.vue"));
+      return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Table_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Table.vue */ "./resources/js/components/Person/Table.vue"));
     },
     name: 'person.index'
   }, {
-    path: '/create',
+    path: '/people/create',
     component: function component() {
       return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Create_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Create.vue */ "./resources/js/components/Person/Create.vue"));
     },
     name: 'person.create'
   }, {
-    path: '/show',
-    component: function component() {
-      return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Show_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Show.vue */ "./resources/js/components/Person/Show.vue"));
-    },
-    name: 'person.show'
-  }, {
-    path: '/edit',
+    path: '/people/:id/edit',
     component: function component() {
       return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Edit_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Edit.vue */ "./resources/js/components/Person/Edit.vue"));
     },
     name: 'person.edit'
+  }, {
+    path: '/people/:id',
+    component: function component() {
+      return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Show_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Show.vue */ "./resources/js/components/Person/Show.vue"));
+    },
+    name: 'person.show'
   }]
 }));
 
@@ -43562,7 +43562,7 @@ module.exports = JSON.parse('{"name":"axios","version":"0.21.4","description":"P
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames not based on template
-/******/ 			if ({"resources_js_components_Person_Index_vue":1,"resources_js_components_Person_Create_vue":1,"resources_js_components_Person_Show_vue":1,"resources_js_components_Person_Edit_vue":1}[chunkId]) return "js/" + chunkId + ".js";
+/******/ 			if ({"resources_js_components_Person_Table_vue":1,"resources_js_components_Person_Create_vue":1,"resources_js_components_Person_Edit_vue":1,"resources_js_components_Person_Show_vue":1}[chunkId]) return "js/" + chunkId + ".js";
 /******/ 			// return url for filenames based on template
 /******/ 			return undefined;
 /******/ 		};
