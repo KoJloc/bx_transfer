@@ -13,22 +13,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Table",
-  data: function data() {
-    return {
-      people: null
-    };
-  },
   mounted: function mounted() {
-    this.getPeople();
+    this.$store.dispatch('getPeople');
   },
-  methods: {
-    getPeople: function getPeople() {
-      var _this = this;
-      axios.post('/api/people').then(function (res) {
-        _this.people = res.data;
-      })["catch"](function (err) {
-        console.log(err);
-      });
+  methods: {},
+  computed: {
+    people: function people() {
+      return this.$store.getters.people;
     }
   }
 });
@@ -52,7 +43,27 @@ var render = function render() {
   return _c("div", [_c("table", {
     staticClass: "table"
   }, [_vm._m(0), _vm._v(" "), _c("tbody", _vm._l(_vm.people, function (person) {
-    return _c("tr", [_c("td", [_vm._v(_vm._s(person.name))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(person.age))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(person.job))])]);
+    return _c("tr", [_c("td", [_c("router-link", {
+      attrs: {
+        to: {
+          name: "person.show",
+          params: {
+            id: person.id
+          }
+        }
+      }
+    }, [_vm._v(_vm._s(person.name))])], 1), _vm._v(" "), _c("td", [_vm._v(_vm._s(person.age))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(person.job))]), _vm._v(" "), _c("td", [_c("a", {
+      staticClass: "btn btn-outline-danger btn-sm",
+      attrs: {
+        href: "#"
+      },
+      on: {
+        click: function click($event) {
+          $event.preventDefault();
+          return _vm.$store.dispatch("deletePerson", person.id);
+        }
+      }
+    }, [_vm._v("Delete")])])]);
   }), 0)])]);
 };
 var staticRenderFns = [function () {
@@ -70,7 +81,11 @@ var staticRenderFns = [function () {
     attrs: {
       scope: "col"
     }
-  }, [_vm._v("Job")])])]);
+  }, [_vm._v("Job")]), _vm._v(" "), _c("th", {
+    attrs: {
+      scope: "col"
+    }
+  }, [_vm._v("Delete")])])]);
 }];
 render._withStripped = true;
 

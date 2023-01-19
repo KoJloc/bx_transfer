@@ -26,7 +26,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['namespace' => 'Person', 'prefix' => 'people'], function () {
     Route::post('/create', [StoreController::class, '__invoke']);
     Route::post('/', [TableController::class, '__invoke']);
-    Route::get('/{person}', [ShowController::class, '__invoke']);
+    Route::post('/{person}', [ShowController::class, '__invoke']);
     Route::patch('/{person}', [UpdateController::class,'__invoke']);
     Route::delete('/{person}', [DeleteController::class,'__invoke']);
 });

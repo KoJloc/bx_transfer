@@ -11,8 +11,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _router__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../router */ "./resources/js/router.js");
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Create",
   data: function data() {
@@ -22,19 +20,10 @@ __webpack_require__.r(__webpack_exports__);
       job: ''
     };
   },
-  methods: {
-    store: function store() {
-      axios.post('/api/people/create', {
-        name: this.name,
-        age: this.age,
-        job: this.job
-      }).then(function (res) {
-        _router__WEBPACK_IMPORTED_MODULE_0__["default"].push({
-          name: "person.index"
-        });
-      })["catch"](function (err) {
-        console.log(err);
-      });
+  methods: {},
+  computed: {
+    isButtonDisabled: function isButtonDisabled() {
+      return !(this.name && this.age && this.job);
     }
   }
 });
@@ -141,13 +130,18 @@ var render = function render() {
   })]), _vm._v(" "), _c("div", [_c("input", {
     staticClass: "btn btn-primary mt-3",
     attrs: {
+      disabled: _vm.isButtonDisabled,
       type: "submit",
       value: "Add"
     },
     on: {
       click: function click($event) {
         $event.preventDefault();
-        return _vm.store.apply(null, arguments);
+        return _vm.$store.dispatch("storePerson", {
+          name: _vm.name,
+          age: _vm.age,
+          job: _vm.job
+        });
       }
     }
   })])]);

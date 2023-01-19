@@ -1,7 +1,7 @@
 <template>
     <div>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <router-link :to="{name: 'person.index'}" class="navbar-brand">Main</router-link>
+            <router-link :to="{name: 'person.index'}" class="navbar-brand">Table</router-link>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -11,7 +11,7 @@
                         <router-link :to="{name: 'person.create'}" class="nav-link">Create</router-link>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Pricing</a>
+                        <a class="nav-link disabled" href="#">Disabled</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link disabled" href="#">Disabled</a>

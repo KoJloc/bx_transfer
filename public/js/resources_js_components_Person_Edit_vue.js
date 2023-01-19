@@ -11,47 +11,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _router__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../router */ "./resources/js/router.js");
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Edit",
-  data: function data() {
-    return {
-      name: '',
-      age: '',
-      job: ''
-    };
-  },
   mounted: function mounted() {
-    this.getPerson();
+    this.$store.dispatch('getPerson', this.$route.params.id);
   },
-  methods: {
-    getPerson: function getPerson() {
-      var _this = this;
-      axios.get('/api/people/edit' + this.$route.params.id).then(function (res) {
-        _this.name = res.data.name;
-        _this.age = res.data.age;
-        _this.job = res.data.job;
-      })["catch"](function (error) {
-        console.log(error);
-      });
+  methods: {},
+  computed: {
+    isButtonDisabled: function isButtonDisabled() {
+      return !(this.person.name && this.person.age && this.person.job);
     },
-    updatePerson: function updatePerson() {
-      var _this2 = this;
-      axios.patch('/api/people/' + this.$route.params.id, {
-        name: this.name,
-        age: this.age,
-        job: this.job
-      }).then(function (res) {
-        _router__WEBPACK_IMPORTED_MODULE_0__["default"].push({
-          name: 'person.show',
-          params: {
-            id: _this2.$route.params.id
-          }
-        });
-      })["catch"](function (error) {
-        console.log(error);
-      });
+    person: function person() {
+      return this.$store.getters.person;
     }
   }
 });
@@ -72,7 +43,7 @@ __webpack_require__.r(__webpack_exports__);
 var render = function render() {
   var _vm = this,
     _c = _vm._self._c;
-  return _c("div", {
+  return _vm.person ? _c("div", {
     staticClass: "w-25"
   }, [_c("div", {
     staticClass: "form-group mb-1"
@@ -84,8 +55,8 @@ var render = function render() {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.name,
-      expression: "name"
+      value: _vm.person.name,
+      expression: "person.name"
     }],
     staticClass: "form-control",
     attrs: {
@@ -93,12 +64,12 @@ var render = function render() {
       placeholder: "name"
     },
     domProps: {
-      value: _vm.name
+      value: _vm.person.name
     },
     on: {
       input: function input($event) {
         if ($event.target.composing) return;
-        _vm.name = $event.target.value;
+        _vm.$set(_vm.person, "name", $event.target.value);
       }
     }
   })]), _vm._v(" "), _c("div", {
@@ -111,8 +82,8 @@ var render = function render() {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.age,
-      expression: "age"
+      value: _vm.person.age,
+      expression: "person.age"
     }],
     staticClass: "form-control",
     attrs: {
@@ -120,12 +91,12 @@ var render = function render() {
       placeholder: "age"
     },
     domProps: {
-      value: _vm.age
+      value: _vm.person.age
     },
     on: {
       input: function input($event) {
         if ($event.target.composing) return;
-        _vm.age = $event.target.value;
+        _vm.$set(_vm.person, "age", $event.target.value);
       }
     }
   })]), _vm._v(" "), _c("div", {
@@ -138,8 +109,8 @@ var render = function render() {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.job,
-      expression: "job"
+      value: _vm.person.job,
+      expression: "person.job"
     }],
     staticClass: "form-control",
     attrs: {
@@ -147,27 +118,33 @@ var render = function render() {
       placeholder: "job"
     },
     domProps: {
-      value: _vm.job
+      value: _vm.person.job
     },
     on: {
       input: function input($event) {
         if ($event.target.composing) return;
-        _vm.job = $event.target.value;
+        _vm.$set(_vm.person, "job", $event.target.value);
       }
     }
   })]), _vm._v(" "), _c("div", [_c("input", {
     staticClass: "btn btn-primary mt-3",
     attrs: {
+      disabled: _vm.isButtonDisabled,
       type: "submit",
       value: "Update "
     },
     on: {
       click: function click($event) {
         $event.preventDefault();
-        return _vm.updatePerson.apply(null, arguments);
+        return _vm.$store.dispatch("updatePerson", {
+          id: _vm.person.id,
+          name: _vm.person.name,
+          age: _vm.person.age,
+          job: _vm.person.job
+        });
       }
     }
-  })])]);
+  })]), _vm._v(" "), _c("div")]) : _vm._e();
 };
 var staticRenderFns = [];
 render._withStripped = true;
