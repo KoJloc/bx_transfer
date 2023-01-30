@@ -11,17 +11,65 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var v_select2_multiple_component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! v-select2-multiple-component */ "./node_modules/v-select2-multiple-component/src/Select2MultipleControl.vue");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Table",
+  data: function data() {
+    return {
+      myValue: '',
+      Departments: [],
+      onlyActiveDepartments: []
+    };
+  },
+  components: {
+    Select2MultipleControl: v_select2_multiple_component__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
   mounted: function mounted() {
     this.$store.dispatch('getPeople');
   },
-  methods: {},
-  computed: {
-    people: function people() {
-      return this.$store.getters.people;
+  methods: {
+    onlyActiveDepartmentSelect: function onlyActiveDepartmentSelect(id) {
+      for (var i = 0; i < this.onlyActiveDepartments.length; i++) {
+        if (id.id === this.onlyActiveDepartments[i]) {
+          this.onlyActiveDepartments.splice(i, 1);
+          // console.log('Удаляем, если есть совпадение')
+          console.log(this.onlyActiveDepartments);
+          return;
+        }
+      }
+      this.onlyActiveDepartments.push(id.id);
+      console.log(this.onlyActiveDepartments);
+      // console.log('Добавляем пользователя')
+    },
+    DepartmentSelect: function DepartmentSelect(id) {
+      for (var i = 0; i < this.Departments.length; i++) {
+        if (id.id === this.Departments[i]) {
+          this.Departments.splice(i, 1);
+          // console.log('Удаляем совпадение')
+          console.log(this.Departments);
+          return;
+        }
+      }
+      this.Departments.push(id.id);
+      console.log(this.Departments);
+      // console.log('Добавляем пользователя')
     }
-  }
+  },
+
+  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapGetters)({
+    people: 'people',
+    myOptions: 'myOptions',
+    myOptionsOnlyActive: 'myOptionsOnlyActive'
+  }))
 });
 
 /***/ }),
@@ -40,53 +88,51 @@ __webpack_require__.r(__webpack_exports__);
 var render = function render() {
   var _vm = this,
     _c = _vm._self._c;
-  return _c("div", [_c("table", {
-    staticClass: "table"
-  }, [_vm._m(0), _vm._v(" "), _c("tbody", _vm._l(_vm.people, function (person) {
-    return _c("tr", [_c("td", [_c("router-link", {
-      attrs: {
-        to: {
-          name: "person.show",
-          params: {
-            id: person.id
-          }
-        }
+  return _c("div", {
+    staticClass: "container"
+  }, [_c("div", {
+    staticClass: "row"
+  }, [_c("div", {
+    staticClass: "col"
+  }, [_c("select2-multiple-control", {
+    attrs: {
+      id: "DepartmentSelect",
+      options: _vm.myOptions
+    },
+    on: {
+      select: function select($event) {
+        return _vm.DepartmentSelect($event);
       }
-    }, [_vm._v(_vm._s(person.name))])], 1), _vm._v(" "), _c("td", [_vm._v(_vm._s(person.age))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(person.job))]), _vm._v(" "), _c("td", [_c("a", {
-      staticClass: "btn btn-outline-danger btn-sm",
-      attrs: {
-        href: "#"
+    },
+    model: {
+      value: _vm.myOptions.id,
+      callback: function callback($$v) {
+        _vm.$set(_vm.myOptions, "id", $$v);
       },
-      on: {
-        click: function click($event) {
-          $event.preventDefault();
-          return _vm.$store.dispatch("deletePerson", person.id);
-        }
+      expression: "myOptions.id"
+    }
+  })], 1), _vm._v(" "), _c("div", {
+    staticClass: "col"
+  }, [_c("select2-multiple-control", {
+    attrs: {
+      id: "onlyActiveDepartmentSelect",
+      options: _vm.myOptionsOnlyActive
+    },
+    on: {
+      select: function select($event) {
+        return _vm.onlyActiveDepartmentSelect($event);
       }
-    }, [_vm._v("Delete")])])]);
-  }), 0)])]);
+    },
+    model: {
+      value: _vm.myOptionsOnlyActive.id,
+      callback: function callback($$v) {
+        _vm.$set(_vm.myOptionsOnlyActive, "id", $$v);
+      },
+      expression: "myOptionsOnlyActive.id"
+    }
+  })], 1)])]);
 };
-var staticRenderFns = [function () {
-  var _vm = this,
-    _c = _vm._self._c;
-  return _c("thead", [_c("tr", [_c("th", {
-    attrs: {
-      scope: "col"
-    }
-  }, [_vm._v("Name")]), _vm._v(" "), _c("th", {
-    attrs: {
-      scope: "col"
-    }
-  }, [_vm._v("Age")]), _vm._v(" "), _c("th", {
-    attrs: {
-      scope: "col"
-    }
-  }, [_vm._v("Job")]), _vm._v(" "), _c("th", {
-    attrs: {
-      scope: "col"
-    }
-  }, [_vm._v("Delete")])])]);
-}];
+var staticRenderFns = [];
 render._withStripped = true;
 
 

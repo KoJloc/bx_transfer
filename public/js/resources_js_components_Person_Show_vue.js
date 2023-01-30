@@ -14,12 +14,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Show",
   mounted: function mounted() {
-    this.$store.dispatch('getPerson', this.$route.params.id);
+    this.$store.dispatch('getPerson', this.$route.params.ID);
   },
   computed: {
     person: function person() {
       return this.$store.getters.person;
-    }
+    },
+    value: function value() {}
   }
 });
 
@@ -39,12 +40,12 @@ __webpack_require__.r(__webpack_exports__);
 var render = function render() {
   var _vm = this,
     _c = _vm._self._c;
-  return _vm.person ? _c("div", [_c("div", [_vm._v("\n        Name: " + _vm._s(_vm.person.name) + "\n    ")]), _vm._v(" "), _c("div", [_vm._v("\n        Age: " + _vm._s(_vm.person.age) + "\n    ")]), _vm._v(" "), _c("div", [_vm._v("\n        Job: " + _vm._s(_vm.person.job) + "\n    ")]), _vm._v(" "), _c("div", [_c("router-link", {
+  return _vm.person ? _c("div", [_c("div", [_vm._v("\n        ID: " + _vm._s(_vm.person.ID) + "\n    ")]), _vm._v(" "), _c("div", [_vm._v("\n        ASSIGNED_BY_ID: " + _vm._s(_vm.person.ASSIGNED_BY_ID) + "\n    ")]), _vm._v(" "), _c("div", [_vm._v("\n        SECOND_NAME: " + _vm._s(_vm.person.SECOND_NAME) + "\n    ")]), _vm._v(" "), _c("div", [_vm._v("\n        LAST_NAME: " + _vm._s(_vm.person.LAST_NAME) + "\n    ")]), _vm._v(" "), _c("div", [_vm._v("\n        LEAD_ID: " + _vm._s(_vm.person.LEAD_ID) + "\n    ")]), _vm._v(" "), _c("div", [_c("router-link", {
     attrs: {
       to: {
         name: "person.edit",
         params: {
-          id: _vm.person.id
+          id: _vm.person.ID
         }
       }
     }

@@ -15,10 +15,11 @@ class PersonResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'age' => $this->age,
-            'job' => $this->job,
+            'ID' => $this->ID,
+            'SECOND_NAME' => $this->SECOND_NAME,
+            'LAST_NAME' => $this->LAST_NAME,
+            'ASSIGNED_BY_ID' => $this->ASSIGNED_BY_ID,
+            'LEAD_ID' => $this->LEAD_ID,
         ];
     }
 }

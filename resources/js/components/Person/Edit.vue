@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import {mapGetters} from 'vuex';
 
 export default {
     name: "Edit",
@@ -37,13 +38,10 @@ export default {
     },
 
     computed: {
-        isButtonDisabled() {
-            return !(this.person.name && this.person.age && this.person.job)
-        },
-
-        person() {
-            return this.$store.getters.person
-        }
+        ...mapGetters({
+            person: 'person',
+            isButtonDisabled: 'isButtonDisabled',
+        })
     },
 
 }

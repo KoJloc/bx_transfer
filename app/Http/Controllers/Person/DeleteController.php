@@ -14,3 +14,4 @@ class DeleteController extends Controller
         return response([]);
     }
 }
+

@@ -1,16 +1,22 @@
 <template>
     <div v-if="person">
         <div>
-            Name: {{ person.name }}
+            ID: {{ person.ID }}
         </div>
         <div>
-            Age: {{ person.age }}
+            ASSIGNED_BY_ID: {{ person.ASSIGNED_BY_ID }}
         </div>
         <div>
-            Job: {{ person.job }}
+            SECOND_NAME: {{ person.SECOND_NAME }}
         </div>
         <div>
-        <router-link :to="{name: 'person.edit', params: { id: person.id }}">Edit</router-link>
+            LAST_NAME: {{ person.LAST_NAME }}
+        </div>
+        <div>
+            LEAD_ID: {{ person.LEAD_ID }}
+        </div>
+        <div>
+        <router-link :to="{name: 'person.edit', params: { id: person.ID }}">Edit</router-link>
         </div>
     </div>
 </template>
@@ -18,15 +24,19 @@
 <script>
 
 export default {
+
     name: "Show",
 
     mounted() {
-        this.$store.dispatch('getPerson', this.$route.params.id)
+        this.$store.dispatch('getPerson', this.$route.params.ID)
     },
 
     computed: {
         person(){
             return this.$store.getters.person
+        },
+        value() {
+
         }
     }
 

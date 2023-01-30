@@ -24,9 +24,10 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
-            'age' => 'required|integer',
-            'job' => 'required|string',
+            'SECOND_NAME' => 'required|string',
+            'LAST_NAME' => 'required|string',
+            'ASSIGNED_BY_ID' => 'required|integer',
+            'LEAD_ID' => 'required|integer',
         ];
     }
 }

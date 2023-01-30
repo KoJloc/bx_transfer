@@ -1,47 +1,78 @@
 <template>
-    <div>
-        <table class="table">
-            <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Age</th>
-                <th scope="col">Job</th>
-                <th scope="col">Delete</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="person in people">
-                <td>
-                    <router-link :to="{ name: 'person.show', params: { id:person.id }}">{{ person.name }}</router-link>
-                </td>
-                <td>{{ person.age }}</td>
-                <td>{{ person.job }}</td>
-                <td>
-                    <a @click.prevent="$store.dispatch('deletePerson', person.id )" href="#"
-                       class="btn btn-outline-danger btn-sm">Delete</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <select2-multiple-control id="DepartmentSelect" v-model="myOptions.id"
+                                          :options="myOptions" @select="DepartmentSelect($event)"/>
+            </div>
+            <div class="col">
+                <select2-multiple-control id="onlyActiveDepartmentSelect" v-model="myOptionsOnlyActive.id"
+                                          :options="myOptionsOnlyActive" @select="onlyActiveDepartmentSelect($event)"/>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
+import Select2MultipleControl from 'v-select2-multiple-component';
+import {mapGetters} from "vuex";
 
 export default {
     name: "Table",
 
+    data() {
+        return {
+            myValue: '',
+            Departments: [],
+            onlyActiveDepartments: [],
+        }
+    },
+
+    components: {
+        Select2MultipleControl
+    },
+
     mounted() {
         this.$store.dispatch('getPeople')
     },
+    methods: {
+        onlyActiveDepartmentSelect(id) {
+            for (let i = 0; i < this.onlyActiveDepartments.length; i++) {
+                if (id.id === this.onlyActiveDepartments[i]) {
+                    this.onlyActiveDepartments.splice(i, 1)
+                    // console.log('Удаляем, если есть совпадение')
+                    console.log(this.onlyActiveDepartments)
+                    return
+                }
+            }
+            this.onlyActiveDepartments.push(id.id)
+            console.log(this.onlyActiveDepartments)
+            // console.log('Добавляем пользователя')
+        },
 
-    methods: {},
+        DepartmentSelect(id) {
+            for (let i = 0; i < this.Departments.length; i++) {
+                if (id.id === this.Departments[i]) {
+                    this.Departments.splice(i, 1)
+                    // console.log('Удаляем совпадение')
+                    console.log(this.Departments)
+                    return
+                }
+            }
+            this.Departments.push(id.id)
+            console.log(this.Departments)
+            // console.log('Добавляем пользователя')
+        }
+    },
+
 
     computed: {
-        people() {
-            return this.$store.getters.people
-        }
-    }
+        ...mapGetters({
+            people: 'people',
+            myOptions: 'myOptions',
+            myOptionsOnlyActive: 'myOptionsOnlyActive',
+        }),
+    },
 
 }
 </script>

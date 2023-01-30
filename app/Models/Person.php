@@ -9,6 +9,4 @@ class Person extends Model
 {
     use HasFactory;
     protected $guarded=false;
-
-
 }
