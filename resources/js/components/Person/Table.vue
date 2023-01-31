@@ -9,6 +9,9 @@
                 <select2-multiple-control id="onlyActiveDepartmentSelect" v-model="myOptionsOnlyActive.id"
                                           :options="myOptionsOnlyActive" @select="onlyActiveDepartmentSelect($event)"/>
             </div>
+            <div>
+                <button type="submit" class="btn btn-primary mt-3">Подтвердить выбор</button>
+            </div>
         </div>
     </div>
 </template>

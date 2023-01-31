@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Person;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Persone\MarkedPeopleRequest;
+use App\Http\Resources\MarkedPeopleResource;
 use Illuminate\Http\Request;
 
 class MarkedPeopleController extends Controller
@@ -14,9 +14,10 @@ class MarkedPeopleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(MarkedPeopleRequest $request)
+    public function __invoke(MarkedPeopleResource $resource)
     {
-        $data  = $request->validated();
-        return $data;
+        $data  = $resource->validated();
+//        return $data;
+        dd($data);
     }
 }

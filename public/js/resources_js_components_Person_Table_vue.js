@@ -130,9 +130,18 @@ var render = function render() {
       },
       expression: "myOptionsOnlyActive.id"
     }
-  })], 1)])]);
+  })], 1), _vm._v(" "), _vm._m(0)])]);
 };
-var staticRenderFns = [];
+var staticRenderFns = [function () {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("div", [_c("button", {
+    staticClass: "btn btn-primary mt-3",
+    attrs: {
+      type: "submit"
+    }
+  }, [_vm._v("Подтвердить выбор")])]);
+}];
 render._withStripped = true;
 
 

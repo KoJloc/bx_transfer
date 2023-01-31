@@ -31,6 +31,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['namespace' => 'Person', 'prefix' => 'people'], function () {
         Route::post('/', [LeadController::class, '__invoke']);
         Route::post('/', [UserController::class, '__invoke']);
+        Route::post('/marked', [MarkedPeopleController::class, '__invoke']);
         Route::post('/{person}', [ShowController::class, '__invoke']);
         Route::patch('/{person}', [UpdateController::class, '__invoke']);
         Route::delete('/{person}', [DeleteController::class, '__invoke']);

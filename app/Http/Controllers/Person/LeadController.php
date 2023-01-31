@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Person;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CRest;
-use App\Http\Requests\Persone\LeadRequest;
-use App\Models\Lead;
-use Illuminate\Http\Request;
+use App\Http\Resources\MarkedPeopleResource;
 
 class LeadController extends Controller
 {
 
-    public function __invoke(LeadRequest $request)
+    public function __invoke(MarkedPeopleResource $resource)
     {
         define('C_REST_WEB_HOOK_URL', 'https://xn--24-9kc.xn--d1ao9c.xn--p1ai/rest/53083/b4ye1avz6dmkned1/');//url on creat Webhook
 
@@ -25,10 +23,12 @@ class LeadController extends Controller
         $selectedPeople = [];
         $connectedLeads = [];
 
-//        foreach ($leads as $item) {
-//
-//
-//
+        foreach ($leads as $item) {
+
+        }
+
+
+
 //
 //            $selectedPeople = [
 //                'id' => $person['ID'],
