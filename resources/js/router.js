@@ -13,21 +13,6 @@ const router = new VueRouter({
             component: () => import('./components/Person/Table.vue'),
             name: 'person.index'
         },
-        // {
-        //     path: '/people/create',
-        //     component: () => import('./components/Person/Create.vue'),
-        //     name: 'person.create'
-        // },
-        // {
-        //     path: '/people/:id/edit',
-        //     component: () => import('./components/Person/Edit.vue'),
-        //     name: 'person.edit'
-        // },
-        // {
-        //     path: '/people/:id',
-        //     component: () => import('./components/Person/Show.vue'),
-        //     name: 'person.show'
-        // },
         {
             path: '/user/login',
             component: () => import('./components/Person/Login.vue'),

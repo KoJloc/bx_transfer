@@ -4,31 +4,53 @@ namespace App\Http\Controllers\Person;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CRest;
-use App\Http\Resources\MarkedPeopleResource;
+use App\Models\Lead;
 
 class LeadController extends Controller
 {
-
-    public function __invoke(MarkedPeopleResource $resource)
+    function __construct(){
+        parent::__construct();
+    }
+    public function __invoke(Lead $lead)
     {
         define('C_REST_WEB_HOOK_URL', 'https://xn--24-9kc.xn--d1ao9c.xn--p1ai/rest/53083/b4ye1avz6dmkned1/');//url on creat Webhook
 
-        $markedPeopleMultiSelect = [];
-        $markedOnlyActivePeopleMultiSelect = [];
-
-        $leads = CRest::firstBatch('crm.lead.list', [
+        $leads = CRest::call('crm.lead.list', [
+            'filter' => ['ASSIGNED_BY_ID' => $this->peopleMultiSelect,],
             'select' => ['ID','ASSIGNED_BY_ID', 'CONTACT_ID', 'NAME', 'LEAD_SUMMARY', 'DATE_CREATE', 'LAST_NAME', 'SECOND_NAME', 'PHONE']
         ]);
+//        $deals = CRest::firstBatch('crm.deal.list', [
+//            'filter' => ['ASSIGNED_BY_ID' => $this->peopleMultiSelect,],
+//            'select' => ['ID','ASSIGNED_BY_ID', 'CONTACT_ID', 'NAME', 'LEAD_SUMMARY', 'DATE_CREATE', 'LAST_NAME', 'SECOND_NAME', 'PHONE']
+//        ]);
+//
+//        $contacts = CRest::firstBatch('crm.contacts.list', [
+//            'filter' => ['ASSIGNED_BY_ID' => $this->peopleMultiSelect,],
+//            'select' => ['ID','ASSIGNED_BY_ID', 'CONTACT_ID', 'NAME', 'LEAD_SUMMARY', 'DATE_CREATE', 'LAST_NAME', 'SECOND_NAME', 'PHONE']
+//        ]);
 
-        $selectedPeople = [];
-        $connectedLeads = [];
+        dd($this->peopleMultiSelect);
 
-        foreach ($leads as $item) {
-
+        foreach ($this->peopleMultiSelect as $person){
+            $this->leadsById[$person] = $person;
+            foreach ($leads as $key => $lead){
+                if ($lead['ASSIGNED_BY_ID'] == $person){
+                    $this->leadsById[$person][$key][] = $key;
+                }
+            }
         }
 
 
-
+//        for ($i = 0; $i < count($this->peopleMultiSelect); $i++) {
+//            array_push($this->leadsById['personId']=>$this->peopleMultiSelect[$i])
+//            for ($j = 0; $j < count($leads); $j++) {
+//                    if ($this->peopleMultiSelect[$i]['id'] == $lead[$j]['ASSIGNED_BY_ID']) {
+//                        $this->leadsById=[
+//                           'personId'=>$this->peopleMultiSelect[$i]['id'],
+//                            'leadId'=>$lead[$j]['ID'],
+//                        ];
+//                    }
+//                }
 //
 //            $selectedPeople = [
 //                'id' => $person['ID'],
@@ -46,7 +68,10 @@ class LeadController extends Controller
 //        }
 
         return [
-          'leads' => $leads
+//          'leads' => $leads,
+            'leadsById' => $this->leadsById,
+//            'activePeopleMultiSelectFromLeads' => $this->activePeopleMultiSelect,
+//            'peopleMultiSelectFromLeads' => $this->peopleMultiSelect
 //            'activePeopleMultiSelect' => $activePeopleMultiSelect,
 //            'peopleMultiSelect' => $peopleMultiSelect,
         ];

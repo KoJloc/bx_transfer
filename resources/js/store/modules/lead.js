@@ -1,58 +1,63 @@
 import router from '../../router'
 
 const state = {
-    person: {
+    lead: {
         ID: '',
+        ASSIGNED_BY_ID: '',
+        CONTACT_ID: '',
+        LEAD_SUMMARY: '',
+        DATE_CREATE: '',
         NAME: '',
-        SECOND_NAME: '',
         LAST_NAME: '',
-    },
-    body: '',
-    people: '',
-    myOptions: [],
-    myOptionsOnlyActive: [],
-    markedPeople: [],
+        SECOND_NAME: '',
+        PHONE: '',
+},
+    leadsById: [],
+    // body: '',
+    // people: '',
+    // myOptions: [],
+    // myOptionsOnlyActive: [],
+    // markedPeople: [],
+    // loh: [],
+    // loh1: [],
 }
 
 const getters = {
-    person: () => state.person,
-    people: () => state.people,
-    myOptions: () => state.myOptions,
-    myOptionsOnlyActive: () => state.myOptionsOnlyActive,
-    markedPeople: () => state.markedPeople,
+    leadById: () => state.leadsById,
+    // person: () => state.person,
+    // people: () => state.people,
+    // myOptions: () => state.myOptions,
+    // myOptionsOnlyActive: () => state.myOptionsOnlyActive,
+    // markedPeople: () => state.markedPeople,
 
 }
 
 const actions = {
 
-    getPeople({state, commit, dispatch}) {
-        axios.post('/api/people')
+    getLeadById({state, commit, dispatch}) {
+        axios.post('/api/people/lead')
             .then(res => {
-                commit('setPeople', res.data.people)
-                commit('myOptions', res.data.peopleMultiSelect)
-                commit('myOptionsOnlyActive', res.data.activePeopleMultiSelect)
-                console.log(res.data)
+                commit('setLeadById', res.data.leadsById)
             })
             .catch(
                 (error) => {
-                console.log(error)
-            })
+                    console.log(error.message)
+                })
     },
 
-    storePeople({state, commit, dispatch}, id) {
-        axios.patch('/api/people/id')
-            .then(res => {
-                id: res.data
-            })
-    }
-    //
-    // getLead({state, commit, dispatch}) {
-    //     axios.post('/api/people/lead')
+    // getPeople({state, commit, dispatch}) {
+    //     axios.post('/api/people')
     //         .then(res => {
-    //
+    //             commit('setPeople', res.data.people)
+    //             commit('myOptions', res.data.peopleMultiSelect)
+    //             commit('myOptionsOnlyActive', res.data.activePeopleMultiSelect)
+    //             console.log(res.data)
     //         })
+    //         .catch(
+    //             (error) => {
+    //                 console.log(error.message)
+    //             })
     // },
-
     // getPerson({state, commit, dispatch}, ID) {
     //     axios.post(`/api/people/${ID}`)
     //         .then(res => {
@@ -91,7 +96,7 @@ const actions = {
     //                 console.log(error)
     //             })
     // },
-
+    //
     // storePerson({}, data){
     //     axios.post('/api/people/lead', {
     //         ID: data.id,
@@ -106,11 +111,12 @@ const actions = {
 }
 
 const mutations = {
-    setPerson:(state, person)=>state.person = person,
-    setPeople:(state, people)=>state.people = people,
-    myOptions:(state, myOptions)=>state.myOptions = myOptions,
-    myOptionsOnlyActive:(state, myOptionsOnlyActive) =>state.myOptionsOnlyActive = myOptionsOnlyActive,
-    markedPeople:(state, markedPeople)=>state.markedPeople = markedPeople,
+    setLeadById:(state, leadById)=>state.leadsById = leadById,
+
+    // setPeople:(state, people)=>state.people = people,
+    // myOptions:(state, myOptions)=>state.myOptions = myOptions,
+    // myOptionsOnlyActive:(state, myOptionsOnlyActive) =>state.myOptionsOnlyActive = myOptionsOnlyActive,
+    // markedPeople:(state, markedPeople)=>state.markedPeople = markedPeople,
 }
 
 export default {

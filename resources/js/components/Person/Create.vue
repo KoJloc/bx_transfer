@@ -4,8 +4,7 @@
             <label for="exampleFormControlInput1">Name</label>
             <input type="text" class="form-control" v-model="person.name" placeholder="name">
         </div>
-        <div class="form-group mb-1">
-            <label for="exampleFormControlInput1">Age</label>
+        <div class="form-group mb-1">            <label for="exampleFormControlInput1">Age</label>
             <input type="number" class="form-control" v-model="person.age" placeholder="age">
         </div>
         <div class="form-group mb-1">

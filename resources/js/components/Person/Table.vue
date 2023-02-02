@@ -10,7 +10,7 @@
                                           :options="myOptionsOnlyActive" @select="onlyActiveDepartmentSelect($event)"/>
             </div>
             <div>
-                <button type="submit" class="btn btn-primary mt-3">Подтвердить выбор</button>
+                <button @click.prevent="$store.dispatch('getLeadById')" type="submit" class="btn btn-primary mt-3">Подтвердить выбор</button>
             </div>
         </div>
     </div>
@@ -37,7 +37,9 @@ export default {
 
     mounted() {
         this.$store.dispatch('getPeople')
+
     },
+
     methods: {
         onlyActiveDepartmentSelect(id) {
             for (let i = 0; i < this.onlyActiveDepartments.length; i++) {

@@ -130,18 +130,20 @@ var render = function render() {
       },
       expression: "myOptionsOnlyActive.id"
     }
-  })], 1), _vm._v(" "), _vm._m(0)])]);
-};
-var staticRenderFns = [function () {
-  var _vm = this,
-    _c = _vm._self._c;
-  return _c("div", [_c("button", {
+  })], 1), _vm._v(" "), _c("div", [_c("button", {
     staticClass: "btn btn-primary mt-3",
     attrs: {
       type: "submit"
+    },
+    on: {
+      click: function click($event) {
+        $event.preventDefault();
+        return _vm.$store.dispatch("getLeadById");
+      }
     }
-  }, [_vm._v("Подтвердить выбор")])]);
-}];
+  }, [_vm._v("Подтвердить выбор")])])])]);
+};
+var staticRenderFns = [];
 render._withStripped = true;
 
 

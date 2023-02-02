@@ -7,6 +7,9 @@ use App\Http\Controllers\CRest;
 
 class UserController extends Controller
 {
+    function __construct(){
+        parent::__construct();
+    }
     public function __invoke()
     {
 
@@ -17,20 +20,16 @@ class UserController extends Controller
                 'USER_TYPE' => 'employee'
             ]
         ]);
-        $selectedPeople = [];
-        $peopleMultiSelect = [];
-        $activePeopleMultiSelect = [];
-
         foreach ($people as $person) {
             $selectedPeople = [
                 'id' => $person['ID'],
                 'text' => $person['LAST_NAME'] . ' ' . $person['NAME'] . ' ' . $person['SECOND_NAME']
             ];
             if ($person['ACTIVE'] === true) {
-                $activePeopleMultiSelect[] = $selectedPeople;
-                $peopleMultiSelect[] = $selectedPeople;
+                $this->activePeopleMultiSelect[] = $selectedPeople;
+                $this->peopleMultiSelect[] = $selectedPeople;
             } else {
-                $peopleMultiSelect[] = [
+                $this->peopleMultiSelect[] = [
                     'id' => $person['ID'],
                     'text' => $person['LAST_NAME'] . ' ' . $person['NAME'] . ' ' . $person['SECOND_NAME']
                 ];
@@ -39,8 +38,8 @@ class UserController extends Controller
 
         return [
 //          'people' => count($people),
-            'activePeopleMultiSelect' => $activePeopleMultiSelect,
-            'peopleMultiSelect' => $peopleMultiSelect,
+            'activePeopleMultiSelect' => $this->activePeopleMultiSelect,
+            'peopleMultiSelect' => $this->peopleMultiSelect,
         ];
     }
 }

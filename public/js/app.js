@@ -5565,23 +5565,7 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_2__["default"]({
       return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Table_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Table.vue */ "./resources/js/components/Person/Table.vue"));
     },
     name: 'person.index'
-  },
-  // {
-  //     path: '/people/create',
-  //     component: () => import('./components/Person/Create.vue'),
-  //     name: 'person.create'
-  // },
-  // {
-  //     path: '/people/:id/edit',
-  //     component: () => import('./components/Person/Edit.vue'),
-  //     name: 'person.edit'
-  // },
-  // {
-  //     path: '/people/:id',
-  //     component: () => import('./components/Person/Show.vue'),
-  //     name: 'person.show'
-  // },
-  {
+  }, {
     path: '/user/login',
     component: function component() {
       return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Login_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Login.vue */ "./resources/js/components/Person/Login.vue"));
@@ -5634,25 +5618,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _modules_person__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/person */ "./resources/js/store/modules/person.js");
+/* harmony import */ var _modules_lead__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/lead */ "./resources/js/store/modules/lead.js");
 
 
 
-vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_2__["default"]);
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_2__["default"].Store({
+
+vue__WEBPACK_IMPORTED_MODULE_2__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_3__["default"]);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_3__["default"].Store({
   modules: {
-    Person: _modules_person__WEBPACK_IMPORTED_MODULE_0__["default"]
+    Person: _modules_person__WEBPACK_IMPORTED_MODULE_0__["default"],
+    Lead: _modules_lead__WEBPACK_IMPORTED_MODULE_1__["default"]
   }
 }));
 
 /***/ }),
 
-/***/ "./resources/js/store/modules/person.js":
-/*!**********************************************!*\
-  !*** ./resources/js/store/modules/person.js ***!
-  \**********************************************/
+/***/ "./resources/js/store/modules/lead.js":
+/*!********************************************!*\
+  !*** ./resources/js/store/modules/lead.js ***!
+  \********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -5661,63 +5648,74 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _router__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../router */ "./resources/js/router.js");
-function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("Cannot destructure " + obj); }
 
 var state = {
-  person: {
+  lead: {
     ID: '',
+    ASSIGNED_BY_ID: '',
+    CONTACT_ID: '',
+    LEAD_SUMMARY: '',
+    DATE_CREATE: '',
     NAME: '',
+    LAST_NAME: '',
     SECOND_NAME: '',
-    LAST_NAME: ''
+    PHONE: ''
   },
-  body: '',
-  people: '',
-  myOptions: [],
-  myOptionsOnlyActive: [],
-  markedPeopleBody: []
+  leadsById: []
+  // body: '',
+  // people: '',
+  // myOptions: [],
+  // myOptionsOnlyActive: [],
+  // markedPeople: [],
+  // loh: [],
+  // loh1: [],
 };
+
 var getters = {
-  person: function person() {
-    return state.person;
-  },
-  people: function people() {
-    return state.people;
-  },
-  myOptions: function myOptions() {
-    return state.myOptions;
-  },
-  myOptionsOnlyActive: function myOptionsOnlyActive() {
-    return state.myOptionsOnlyActive;
-  },
-  markedPeopleBody: function markedPeopleBody() {
-    return state.markedPeopleBody;
+  leadById: function leadById() {
+    return state.leadsById;
   }
+  // person: () => state.person,
+  // people: () => state.people,
+  // myOptions: () => state.myOptions,
+  // myOptionsOnlyActive: () => state.myOptionsOnlyActive,
+  // markedPeople: () => state.markedPeople,
 };
+
 var actions = {
-  getPerson: function getPerson(_ref, ID) {
+  getLeadById: function getLeadById(_ref) {
     var state = _ref.state,
       commit = _ref.commit,
       dispatch = _ref.dispatch;
-    axios.post("/api/people/".concat(ID)).then(function (res) {
-      commit('setPerson', res.data);
-      // console.log(res.data)
+    axios.post('/api/people/lead').then(function (res) {
+      commit('setLeadById', res.data.leadsById);
     })["catch"](function (error) {
-      console.log(error);
+      console.log(error.message);
     });
-  },
-  getPeople: function getPeople(_ref2) {
-    var state = _ref2.state,
-      commit = _ref2.commit,
-      dispatch = _ref2.dispatch;
-    axios.post('/api/people').then(function (res) {
-      commit('setPeople', res.data.people);
-      commit('myOptions', res.data.peopleMultiSelect);
-      commit('myOptionsOnlyActive', res.data.activePeopleMultiSelect);
-      console.log(res.data);
-    })["catch"](function (error) {
-      console.log(error);
-    });
-  },
+  } // getPeople({state, commit, dispatch}) {
+  //     axios.post('/api/people')
+  //         .then(res => {
+  //             commit('setPeople', res.data.people)
+  //             commit('myOptions', res.data.peopleMultiSelect)
+  //             commit('myOptionsOnlyActive', res.data.activePeopleMultiSelect)
+  //             console.log(res.data)
+  //         })
+  //         .catch(
+  //             (error) => {
+  //                 console.log(error.message)
+  //             })
+  // },
+  // getPerson({state, commit, dispatch}, ID) {
+  //     axios.post(`/api/people/${ID}`)
+  //         .then(res => {
+  //             commit('setPerson', res.data)
+  //             // console.log(res.data)
+  //         })
+  //         .catch(
+  //             (error) => {
+  //                 console.log(error)
+  //             })
+  // },
   //
   // deletePerson({state, commit, dispatch}, ID) {
   //     axios.delete(`/api/people/${ID}`,)
@@ -5745,21 +5743,159 @@ var actions = {
   //                 console.log(error)
   //             })
   // },
-  storePerson: function storePerson(_ref3, data) {
-    _objectDestructuringEmpty(_ref3);
-    axios.post('/api/people/create', {
-      SECOND_NAME: data.SECOND_NAME,
-      LAST_NAME: data.LAST_NAME,
-      ASSIGNED_BY_ID: data.job,
-      LEAD_ID: data.LEAD_ID
-    }).then(function (res) {
-      _router__WEBPACK_IMPORTED_MODULE_0__["default"].push({
-        name: "person.index"
-      });
-    })["catch"](function (err) {
-      console.log(err);
-    });
+  //
+  // storePerson({}, data){
+  //     axios.post('/api/people/lead', {
+  //         ID: data.id,
+  //     })
+  //         .then(res => {
+  //             console.log(res)
+  //         })
+  //         .catch(err => {
+  //             console.log(err)
+  //         })
+  // },
+};
+var mutations = {
+  setLeadById: function setLeadById(state, leadById) {
+    return state.leadsById = leadById;
   }
+
+  // setPeople:(state, people)=>state.people = people,
+  // myOptions:(state, myOptions)=>state.myOptions = myOptions,
+  // myOptionsOnlyActive:(state, myOptionsOnlyActive) =>state.myOptionsOnlyActive = myOptionsOnlyActive,
+  // markedPeople:(state, markedPeople)=>state.markedPeople = markedPeople,
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  state: state,
+  mutations: mutations,
+  getters: getters,
+  actions: actions
+});
+
+/***/ }),
+
+/***/ "./resources/js/store/modules/person.js":
+/*!**********************************************!*\
+  !*** ./resources/js/store/modules/person.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _router__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../router */ "./resources/js/router.js");
+
+var state = {
+  person: {
+    ID: '',
+    NAME: '',
+    SECOND_NAME: '',
+    LAST_NAME: ''
+  },
+  body: '',
+  people: '',
+  myOptions: [],
+  myOptionsOnlyActive: [],
+  markedPeople: []
+};
+var getters = {
+  person: function person() {
+    return state.person;
+  },
+  people: function people() {
+    return state.people;
+  },
+  myOptions: function myOptions() {
+    return state.myOptions;
+  },
+  myOptionsOnlyActive: function myOptionsOnlyActive() {
+    return state.myOptionsOnlyActive;
+  },
+  markedPeople: function markedPeople() {
+    return state.markedPeople;
+  }
+};
+var actions = {
+  getPeople: function getPeople(_ref) {
+    var state = _ref.state,
+      commit = _ref.commit,
+      dispatch = _ref.dispatch;
+    axios.post('/api/people').then(function (res) {
+      commit('setPeople', res.data.people);
+      commit('myOptions', res.data.peopleMultiSelect);
+      commit('myOptionsOnlyActive', res.data.activePeopleMultiSelect);
+      console.log(res.data);
+    })["catch"](function (error) {
+      console.log(error);
+    });
+  },
+  storePeople: function storePeople(_ref2, id) {
+    var state = _ref2.state,
+      commit = _ref2.commit,
+      dispatch = _ref2.dispatch;
+    axios.patch('/api/people/id').then(function (res) {
+      id: res.data;
+    });
+  } //
+  // getLead({state, commit, dispatch}) {
+  //     axios.post('/api/people/lead')
+  //         .then(res => {
+  //
+  //         })
+  // },
+  // getPerson({state, commit, dispatch}, ID) {
+  //     axios.post(`/api/people/${ID}`)
+  //         .then(res => {
+  //             commit('setPerson', res.data)
+  //             // console.log(res.data)
+  //         })
+  //         .catch(
+  //             (error) => {
+  //                 console.log(error)
+  //             })
+  // },
+  //
+  // deletePerson({state, commit, dispatch}, ID) {
+  //     axios.delete(`/api/people/${ID}`,)
+  //         .then(res => {
+  //             dispatch('getPeople')
+  //         })
+  //         .catch(err => {
+  //             console.log(err)
+  //         })
+  // },
+  //
+  // updatePerson({}, data) {
+  //     axios.patch(`/api/people/${data.ID}`,
+  //         {
+  //             SECOND_NAME: data.SECOND_NAME,
+  //             LAST_NAME: data.LAST_NAME,
+  //             ASSIGNED_BY_ID: data.ASSIGNED_BY_ID,
+  //             LEAD_ID: data.LEAD_ID,
+  //         })
+  //         .then(res => {
+  //             router.push({ SECOND_NAME:'person.show', params: {id: data.ID }})
+  //         })
+  //         .catch(
+  //             (error) => {
+  //                 console.log(error)
+  //             })
+  // },
+  // storePerson({}, data){
+  //     axios.post('/api/people/lead', {
+  //         ID: data.id,
+  //     })
+  //         .then(res => {
+  //             console.log(res)
+  //         })
+  //         .catch(err => {
+  //             console.log(err)
+  //         })
+  // },
 };
 var mutations = {
   setPerson: function setPerson(state, person) {
@@ -5774,8 +5910,8 @@ var mutations = {
   myOptionsOnlyActive: function myOptionsOnlyActive(state, _myOptionsOnlyActive) {
     return state.myOptionsOnlyActive = _myOptionsOnlyActive;
   },
-  markedPeopleBody: function markedPeopleBody(state, _markedPeopleBody) {
-    return state.markedPeopleBody = _markedPeopleBody;
+  markedPeople: function markedPeople(state, _markedPeople) {
+    return state.markedPeople = _markedPeople;
   }
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
