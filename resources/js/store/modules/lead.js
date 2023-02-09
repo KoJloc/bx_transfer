@@ -34,17 +34,6 @@ const getters = {
 
 const actions = {
 
-    getLeadById({state, commit, dispatch}) {
-        axios.post('/api/people/lead')
-            .then(res => {
-                commit('setLeadById', res.data.leadsById)
-            })
-            .catch(
-                (error) => {
-                    console.log(error.message)
-                })
-    },
-
     // getPeople({state, commit, dispatch}) {
     //     axios.post('/api/people')
     //         .then(res => {

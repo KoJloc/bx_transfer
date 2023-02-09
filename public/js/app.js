@@ -5683,16 +5683,8 @@ var getters = {
 };
 
 var actions = {
-  getLeadById: function getLeadById(_ref) {
-    var state = _ref.state,
-      commit = _ref.commit,
-      dispatch = _ref.dispatch;
-    axios.post('/api/people/lead').then(function (res) {
-      commit('setLeadById', res.data.leadsById);
-    })["catch"](function (error) {
-      console.log(error.message);
-    });
-  } // getPeople({state, commit, dispatch}) {
+
+  // getPeople({state, commit, dispatch}) {
   //     axios.post('/api/people')
   //         .then(res => {
   //             commit('setPeople', res.data.people)
@@ -5787,8 +5779,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _router__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../router */ "./resources/js/router.js");
-
 var state = {
   person: {
     ID: '',
@@ -5833,14 +5823,27 @@ var actions = {
       console.log(error);
     });
   },
-  storePeople: function storePeople(_ref2, id) {
+  storePeople: function storePeople(_ref2, myOptions) {
     var state = _ref2.state,
       commit = _ref2.commit,
       dispatch = _ref2.dispatch;
-    axios.patch('/api/people/id').then(function (res) {
-      id: res.data;
+    axios.post('/api/people/store')["catch"](function (err) {
+      console.log(err);
     });
   } //
+  //
+  // storePerson({}, data){
+  //     axios.post('/api/people/lead', {
+  //         ID: data.id,
+  //     })
+  //         .then(res => {
+  //             console.log(res)
+  //         })
+  //         .catch(err => {
+  //             console.log(err)
+  //         })
+  // },
+  //
   // getLead({state, commit, dispatch}) {
   //     axios.post('/api/people/lead')
   //         .then(res => {
@@ -5884,17 +5887,6 @@ var actions = {
   //             (error) => {
   //                 console.log(error)
   //             })
-  // },
-  // storePerson({}, data){
-  //     axios.post('/api/people/lead', {
-  //         ID: data.id,
-  //     })
-  //         .then(res => {
-  //             console.log(res)
-  //         })
-  //         .catch(err => {
-  //             console.log(err)
-  //         })
   // },
 };
 var mutations = {

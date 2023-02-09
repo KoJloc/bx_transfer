@@ -13,7 +13,8 @@ class Controller extends BaseController
     public $peopleMultiSelect;
     public $activePeopleMultiSelect;
     public $markedLeadsById;
-    public $leadsById;
+    public $markedPeople;
+    public $markedActivePeople;
 
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
@@ -30,14 +31,10 @@ class Controller extends BaseController
 //                    ],
 //        ];
 
-        $this->leadsById = [
-            'personId' => [
-                'leadId',
-            ]
-        ];
-
         $this->peopleMultiSelect=[];
         $this->activePeopleMultiSelect = [];
         $this->markedLeadsById = [];
+        $this->markedPeople = [];
+        $this->markedActivePeople = [];
     }
 }

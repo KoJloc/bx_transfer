@@ -62,9 +62,19 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       this.Departments.push(id.id);
       console.log(this.Departments);
       // console.log('Добавляем пользователя')
+    },
+    storeSettings: function storeSettings(_ref) {
+      var state = _ref.state,
+        commit = _ref.commit,
+        dispatch = _ref.dispatch;
+      axios.post('/api/people/lead', {
+        'onlyActiveDepartments': this.onlyActiveDepartments,
+        'Departments': this.Departments
+      })["catch"](function (error) {
+        console.log(error);
+      });
     }
   },
-
   computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapGetters)({
     people: 'people',
     myOptions: 'myOptions',
@@ -138,10 +148,10 @@ var render = function render() {
     on: {
       click: function click($event) {
         $event.preventDefault();
-        return _vm.$store.dispatch("getLeadById");
+        return _vm.storeSettings.apply(null, arguments);
       }
     }
-  }, [_vm._v("Подтвердить выбор")])])])]);
+  }, [_vm._v("\n                Подтвердить выбор\n            ")])])])]);
 };
 var staticRenderFns = [];
 render._withStripped = true;

@@ -1,5 +1,3 @@
-import router from '../../router'
-
 const state = {
     person: {
         ID: '',
@@ -35,16 +33,29 @@ const actions = {
             })
             .catch(
                 (error) => {
-                console.log(error)
-            })
+                    console.log(error)
+                })
     },
 
-    storePeople({state, commit, dispatch}, id) {
-        axios.patch('/api/people/id')
-            .then(res => {
-                id: res.data
+    storePeople({state, commit, dispatch}, myOptions) {
+        axios.post('/api/people/store',)
+            .catch(err => {
+                console.log(err)
             })
-    }
+    },
+    //
+    //
+    // storePerson({}, data){
+    //     axios.post('/api/people/lead', {
+    //         ID: data.id,
+    //     })
+    //         .then(res => {
+    //             console.log(res)
+    //         })
+    //         .catch(err => {
+    //             console.log(err)
+    //         })
+    // },
     //
     // getLead({state, commit, dispatch}) {
     //     axios.post('/api/people/lead')
@@ -92,25 +103,15 @@ const actions = {
     //             })
     // },
 
-    // storePerson({}, data){
-    //     axios.post('/api/people/lead', {
-    //         ID: data.id,
-    //     })
-    //         .then(res => {
-    //             console.log(res)
-    //         })
-    //         .catch(err => {
-    //             console.log(err)
-    //         })
-    // },
+
 }
 
 const mutations = {
-    setPerson:(state, person)=>state.person = person,
-    setPeople:(state, people)=>state.people = people,
-    myOptions:(state, myOptions)=>state.myOptions = myOptions,
-    myOptionsOnlyActive:(state, myOptionsOnlyActive) =>state.myOptionsOnlyActive = myOptionsOnlyActive,
-    markedPeople:(state, markedPeople)=>state.markedPeople = markedPeople,
+    setPerson: (state, person) => state.person = person,
+    setPeople: (state, people) => state.people = people,
+    myOptions: (state, myOptions) => state.myOptions = myOptions,
+    myOptionsOnlyActive: (state, myOptionsOnlyActive) => state.myOptionsOnlyActive = myOptionsOnlyActive,
+    markedPeople: (state, markedPeople) => state.markedPeople = markedPeople,
 }
 
 export default {

@@ -10,7 +10,9 @@
                                           :options="myOptionsOnlyActive" @select="onlyActiveDepartmentSelect($event)"/>
             </div>
             <div>
-                <button @click.prevent="$store.dispatch('getLeadById')" type="submit" class="btn btn-primary mt-3">Подтвердить выбор</button>
+                <button @click.prevent="storeSettings" type="submit" class="btn btn-primary mt-3">
+                    Подтвердить выбор
+                </button>
             </div>
         </div>
     </div>
@@ -37,7 +39,6 @@ export default {
 
     mounted() {
         this.$store.dispatch('getPeople')
-
     },
 
     methods: {
@@ -67,17 +68,27 @@ export default {
             this.Departments.push(id.id)
             console.log(this.Departments)
             // console.log('Добавляем пользователя')
-        }
+        },
+
+        storeSettings({state, commit, dispatch}) {
+            axios.post('/api/people/lead', {'onlyActiveDepartments': this.onlyActiveDepartments, 'Departments': this.Departments} )
+                .catch(
+                    (error) => {
+                        console.log(error)
+                    })
+        },
     },
 
 
     computed: {
-        ...mapGetters({
-            people: 'people',
-            myOptions: 'myOptions',
-            myOptionsOnlyActive: 'myOptionsOnlyActive',
-        }),
-    },
+        ...
+            mapGetters({
+                people: 'people',
+                myOptions: 'myOptions',
+                myOptionsOnlyActive: 'myOptionsOnlyActive',
+            }),
+    }
+    ,
 
 }
 </script>
