@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Person;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CRest;
-use App\Http\Middleware\EncryptCookies;
 use Illuminate\Http\Request;
 
 class LeadController extends Controller
@@ -13,9 +12,14 @@ class LeadController extends Controller
 
     public $taskFilter = [];
 
-    function __construct(){
+    public $leadActivityOwnersId = [];
+    public $anotherActivityOwnersId = [];
+
+    function __construct()
+    {
         parent::__construct();
     }
+
     public function __invoke(Request $request)
     {
 //---------------------------------Хук--------------------------------------------------------------------------------//
@@ -34,13 +38,6 @@ class LeadController extends Controller
             'select' => [
                 'ID',
                 'ASSIGNED_BY_ID',
-                'CONTACT_ID',
-                'NAME',
-                'LEAD_SUMMARY',
-                'DATE_CREATE',
-                'LAST_NAME',
-                'SECOND_NAME',
-                'PHONE'
             ]
         ]);
 
@@ -49,10 +46,6 @@ class LeadController extends Controller
             'select' => [
                 'ID',
                 'ASSIGNED_BY_ID',
-                'TITLE',
-                'CONTACT_ID',
-                'TYPE_ID',
-                'OPPORTUNITY'
             ]
         ]);
 
@@ -61,115 +54,104 @@ class LeadController extends Controller
             'select' => [
                 'ID',
                 'ASSIGNED_BY_ID',
-                'SECOND_NAME',
-                'LAST_NAME',
-                'LEAD_ID'
             ]
         ]);
 
 //--------------------------------------Обрабатываем-сущности---------------------------------------------------------//
-
-        //Создаем массив сотрудников
-        foreach ($this->markedPeople as $person){
-            $this->entitiesByEmployerId[$person] = [
-                'leads' => [],
-                'deals' => [],
-                'contacts' => []
-            ];
-        }
-
-//        dump($this->entitiesByEmployerId);
-
         //Перебор массива лидов
-        foreach ($leads as $lead){
-            // Привязываем лиды к сотрудникам
-            $this->entitiesByEmployerId[$lead['ASSIGNED_BY_ID']]['leads'][$lead['ID']] = [];
+        foreach ($leads as $lead) {
+            $this->entitiesByEmployerId['leads'][$lead['ID']] = $lead['ASSIGNED_BY_ID'];
             //Создаем фильтр для task'ов лидов
-            $this->taskFilter['UF_CRM_TASK'][] = 'L_'.$lead['ID'];
+            $this->taskFilter['UF_CRM_TASK'][] = 'L_' . $lead['ID'];
+            //Создаем фильтр для активити
+            $this->leadActivityOwnersId[] = $lead['ID'];
         }
 
         //Перебор массива сделок
-        foreach ($deals as $deal){
-            // Привязываем сделки к сотрудникам
-            $this->entitiesByEmployerId[$deal['ASSIGNED_BY_ID']]['deals'][$deal['ID']] = [];
+        foreach ($deals as $deal) {
+            $this->entitiesByEmployerId['deals'][$deal['ID']] = $deal['ASSIGNED_BY_ID'];
             //Создаем фильтр для task'ов сделок
-            $this->taskFilter['UF_CRM_TASK'][] = 'D_'.$deal['ID'];
+            $this->taskFilter['UF_CRM_TASK'][] = 'D_' . $deal['ID'];
+            //Создаем фильтр для активити
+            $this->anotherActivityOwnersId[] = $deal['ID'];
         }
         //Перебор массива контактов
-        foreach ($contacts as $contact){
-            // Привязываем контакты к сотрудникам
-            $this->entitiesByEmployerId[$contact['ASSIGNED_BY_ID']]['contacts'][$contact['ID']] = [];
+        foreach ($contacts as $contact) {
+            $this->entitiesByEmployerId['contacts'][$contact['ID']] = $contact['ASSIGNED_BY_ID'];
             //Создаем фильтр для task'ов контактов
-            $this->taskFilter['UF_CRM_TASK'][] = 'C_'.$contact['ID'];
+            $this->taskFilter['UF_CRM_TASK'][] = 'C_' . $contact['ID'];
+            //Создаем фильтр для активити
+            $this->anotherActivityOwnersId[] = $contact['ID'];
         }
 
-
-//        echo 'Лиды';
-//        dump($leads)
-//        echo 'Сделки';
-//        dump($deals);
-//        echo 'Контакты';
-//        dump($contacts);
-//        echo 'С кого передаем';
-//        dump($this->markedPeople);
-//        dump($this->entitiesByEmployerId);
-
-//        dump($this->taskFilter);
-
-
-
 //--------------------------------------------------------Таски-------------------------------------------------------//
-//
-//        $tasks = CRest::firstBatch('tasks.task.list', [
-//            'filter' => $this->taskFilter,
-//            'select' => [
-//                'ID',
-//                'RESPONSIBLE_ID',
-//                'UF_CRM_TASK',
-//            ]
-//        ]);
-//
-//        foreach ($tasks as $task){
-//            if ($task['ID'] ==  $this->entitiesByEmployerId[$contact['ASSIGNED_BY_ID']]);
-//        }
-//
-//        dump($tasks);
+
+        $tasks = CRest::firstBatch('tasks.task.list', [
+            'filter' => [
+                $this->taskFilter,
+                'REAL_STATUS' => [1, 2, 3, 4, 6, 7]
+            ],
+            'select' => [
+                'ID',
+                'RESPONSIBLE_ID',
+                'UF_CRM_TASK',
+            ]
+        ]);
+
+
+        foreach ($tasks as $task) {
+            if ($task['ufCrmTask'][0] == 0) continue;
+
+            $ufCrmTask = $task['ufCrmTask'][0];
+            $clearedTaskFilter = substr($ufCrmTask, 2);
+            $typeName = 'leads';
+
+            if (str_contains($ufCrmTask, 'D')) {
+                $typeName = 'deals';
+            } elseif (str_contains($ufCrmTask, 'C')) {
+                $typeName = 'contacts';
+            }
+            $this->entitiesByEmployerId[$typeName][$clearedTaskFilter]['tasks'][] = $task['id'];
+//            $this->entitiesByEmployerId[$typeName][$clearedTaskFilter]['tasks'][$task['id']][] = $task['responsibleId'];
+        }
 
 //----------------------------------------------------Активити--------------------------------------------------------//
 
-        $filter_activity = array(
-            'OWNER_ID'       => $this->markedPeople,
-//            'COMPLETED'      => 'N',
+
+        $leadActivityFilter = array(
+            'OWNER_ID' => $this->leadActivityOwnersId,
+            'COMPLETED' => 'N',
+            "PROVIDER_ID" => ['VOXIMPLANT_CALL', 'CRM_MEETING'], //'VOXIMPLANT_CALL' 'CRM_MEETING' 'TASKS'
         );
 
-        $activity = CRest::firstBatch('crm.activity.list', [
-            'FILTER' => $filter_activity,
-            'select' => [
-//                'COMPLETED',
-//                'ID',
-//                'OWNER_ID',
-//                'OWNER_TYPE_ID',
-//                'ASSOCIATED_ENTITY_ID',
-            ],
+        $anotherActivityFilter = array(
+            'OWNER_ID' => $this->anotherActivityOwnersId,
+            'COMPLETED' => 'N',
+            "PROVIDER_ID" => ['VOXIMPLANT_CALL', 'CRM_MEETING'], //'VOXIMPLANT_CALL' 'CRM_MEETING' 'TASKS'
+            'RESPONSIBLE_ID' => $this->markedPeople,
+        );
+
+        $leadActivities = CRest::firstBatch('crm.activity.list', [
+            'FILTER' => $leadActivityFilter,
         ]);
 
-        dd($activity);
+        dd($leadActivities);
 
+        foreach ($leadActivities as $activity) {
+            $this->entitiesByEmployerId['leads'][$activity['OWNER_ID']]['activity'][] = $activity['ID'];
+        }
 
-//        foreach ($activity as $item) {
-//            if ($item['OWNER_TYPE_ID'] == 1){
-//                $this->entitiesByEmployerId[$item['OWNER_ID']]['leads'][$item['ASSOCIATED_ENTITY_ID']] = $item['ID'];
-//            }elseif ($item['OWNER_TYPE_ID'] == 2) {
-//                $this->entitiesByEmployerId[$item['OWNER_ID']]['deals'][$item['ASSOCIATED_ENTITY_ID']] = $item['ID'];
-//            }elseif ($item['OWNER_TYPE_ID'] == 3) {
-//                $this->entitiesByEmployerId[$item['OWNER_ID']]['deals'][$item['ASSOCIATED_ENTITY_ID']] = $item['ID'];
-//            }
-//        }
+        $anotherActivities = CRest::firstBatch('crm.activity.list', [
+            'FILTER' => $anotherActivityFilter,
+        ]);
 
-        echo 'После присвоения активити';
-        dump($this->entitiesByEmployerId);
+        foreach ($anotherActivities as $activity) {
+            $this->entitiesByEmployerId[$activity['TYPE_ID'] == 2 ? 'deals' : 'contacts'][$activity['OWNER_ID']]['activity'][] = $activity['ID'];
+        }
 
-//        dump($activity);
+//        dump(count($this->entitiesByEmployerId['leads']));
+//        dump(count($this->entitiesByEmployerId['deals']));
+//        dump(count($this->entitiesByEmployerId['contacts']));
 
 
 //        return [
