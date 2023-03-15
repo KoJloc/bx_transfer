@@ -5367,7 +5367,7 @@ var render = function render() {
     staticClass: "navbar-brand",
     attrs: {
       to: {
-        name: "person.index"
+        name: "entities.index"
       }
     }
   }, [_vm._v("Table")]) : _vm._e(), _vm._v(" "), _vm._m(0), _vm._v(" "), _c("div", {
@@ -5560,11 +5560,11 @@ vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vue_router__WEBPACK_IMPORTED_MOD
 var router = new vue_router__WEBPACK_IMPORTED_MODULE_2__["default"]({
   mode: 'history',
   routes: [{
-    path: '/people',
+    path: '/entities',
     component: function component() {
       return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Table_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Table.vue */ "./resources/js/components/Person/Table.vue"));
     },
-    name: 'person.index'
+    name: 'entities.index'
   }, {
     path: '/user/login',
     component: function component() {
@@ -5580,7 +5580,7 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_2__["default"]({
   }, {
     path: '/user/personal',
     component: function component() {
-      return __webpack_require__.e(/*! import() */ "resources_js_components_Person_personal_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/personal.vue */ "./resources/js/components/Person/personal.vue"));
+      return __webpack_require__.e(/*! import() */ "resources_js_components_Person_Personal_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Person/Personal.vue */ "./resources/js/components/Person/Personal.vue"));
     },
     name: 'user.personal'
   }]
@@ -5618,153 +5618,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _modules_person__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/person */ "./resources/js/store/modules/person.js");
-/* harmony import */ var _modules_lead__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/lead */ "./resources/js/store/modules/lead.js");
 
 
 
-
-vue__WEBPACK_IMPORTED_MODULE_2__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_3__["default"]);
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_3__["default"].Store({
+vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_2__["default"]);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_2__["default"].Store({
   modules: {
-    Person: _modules_person__WEBPACK_IMPORTED_MODULE_0__["default"],
-    Lead: _modules_lead__WEBPACK_IMPORTED_MODULE_1__["default"]
+    Person: _modules_person__WEBPACK_IMPORTED_MODULE_0__["default"]
   }
 }));
-
-/***/ }),
-
-/***/ "./resources/js/store/modules/lead.js":
-/*!********************************************!*\
-  !*** ./resources/js/store/modules/lead.js ***!
-  \********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _router__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../router */ "./resources/js/router.js");
-
-var state = {
-  lead: {
-    ID: '',
-    ASSIGNED_BY_ID: '',
-    CONTACT_ID: '',
-    LEAD_SUMMARY: '',
-    DATE_CREATE: '',
-    NAME: '',
-    LAST_NAME: '',
-    SECOND_NAME: '',
-    PHONE: ''
-  },
-  leadsById: []
-  // body: '',
-  // people: '',
-  // myOptions: [],
-  // myOptionsOnlyActive: [],
-  // markedPeople: [],
-  // loh: [],
-  // loh1: [],
-};
-
-var getters = {
-  leadById: function leadById() {
-    return state.leadsById;
-  }
-  // person: () => state.person,
-  // people: () => state.people,
-  // myOptions: () => state.myOptions,
-  // myOptionsOnlyActive: () => state.myOptionsOnlyActive,
-  // markedPeople: () => state.markedPeople,
-};
-
-var actions = {
-
-  // getPeople({state, commit, dispatch}) {
-  //     axios.post('/api/people')
-  //         .then(res => {
-  //             commit('setPeople', res.data.people)
-  //             commit('myOptions', res.data.peopleMultiSelect)
-  //             commit('myOptionsOnlyActive', res.data.activePeopleMultiSelect)
-  //             console.log(res.data)
-  //         })
-  //         .catch(
-  //             (error) => {
-  //                 console.log(error.message)
-  //             })
-  // },
-  // getPerson({state, commit, dispatch}, ID) {
-  //     axios.post(`/api/people/${ID}`)
-  //         .then(res => {
-  //             commit('setPerson', res.data)
-  //             // console.log(res.data)
-  //         })
-  //         .catch(
-  //             (error) => {
-  //                 console.log(error)
-  //             })
-  // },
-  //
-  // deletePerson({state, commit, dispatch}, ID) {
-  //     axios.delete(`/api/people/${ID}`,)
-  //         .then(res => {
-  //             dispatch('getPeople')
-  //         })
-  //         .catch(err => {
-  //             console.log(err)
-  //         })
-  // },
-  //
-  // updatePerson({}, data) {
-  //     axios.patch(`/api/people/${data.ID}`,
-  //         {
-  //             SECOND_NAME: data.SECOND_NAME,
-  //             LAST_NAME: data.LAST_NAME,
-  //             ASSIGNED_BY_ID: data.ASSIGNED_BY_ID,
-  //             LEAD_ID: data.LEAD_ID,
-  //         })
-  //         .then(res => {
-  //             router.push({ SECOND_NAME:'person.show', params: {id: data.ID }})
-  //         })
-  //         .catch(
-  //             (error) => {
-  //                 console.log(error)
-  //             })
-  // },
-  //
-  // storePerson({}, data){
-  //     axios.post('/api/people/lead', {
-  //         ID: data.id,
-  //     })
-  //         .then(res => {
-  //             console.log(res)
-  //         })
-  //         .catch(err => {
-  //             console.log(err)
-  //         })
-  // },
-};
-var mutations = {
-  setLeadById: function setLeadById(state, leadById) {
-    return state.leadsById = leadById;
-  }
-
-  // setPeople:(state, people)=>state.people = people,
-  // myOptions:(state, myOptions)=>state.myOptions = myOptions,
-  // myOptionsOnlyActive:(state, myOptionsOnlyActive) =>state.myOptionsOnlyActive = myOptionsOnlyActive,
-  // markedPeople:(state, markedPeople)=>state.markedPeople = markedPeople,
-};
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  state: state,
-  mutations: mutations,
-  getters: getters,
-  actions: actions
-});
 
 /***/ }),
 
@@ -5810,11 +5675,11 @@ var getters = {
   }
 };
 var actions = {
-  getPeople: function getPeople(_ref) {
+  getEntities: function getEntities(_ref) {
     var state = _ref.state,
       commit = _ref.commit,
       dispatch = _ref.dispatch;
-    axios.post('/api/people').then(function (res) {
+    axios.post('/api/entities').then(function (res) {
       commit('setPeople', res.data.people);
       commit('myOptions', res.data.peopleMultiSelect);
       commit('myOptionsOnlyActive', res.data.activePeopleMultiSelect);
@@ -5822,72 +5687,7 @@ var actions = {
     })["catch"](function (error) {
       console.log(error);
     });
-  },
-  storePeople: function storePeople(_ref2, myOptions) {
-    var state = _ref2.state,
-      commit = _ref2.commit,
-      dispatch = _ref2.dispatch;
-    axios.post('/api/people/store')["catch"](function (err) {
-      console.log(err);
-    });
-  } //
-  //
-  // storePerson({}, data){
-  //     axios.post('/api/people/lead', {
-  //         ID: data.id,
-  //     })
-  //         .then(res => {
-  //             console.log(res)
-  //         })
-  //         .catch(err => {
-  //             console.log(err)
-  //         })
-  // },
-  //
-  // getLead({state, commit, dispatch}) {
-  //     axios.post('/api/people/lead')
-  //         .then(res => {
-  //
-  //         })
-  // },
-  // getPerson({state, commit, dispatch}, ID) {
-  //     axios.post(`/api/people/${ID}`)
-  //         .then(res => {
-  //             commit('setPerson', res.data)
-  //             // console.log(res.data)
-  //         })
-  //         .catch(
-  //             (error) => {
-  //                 console.log(error)
-  //             })
-  // },
-  //
-  // deletePerson({state, commit, dispatch}, ID) {
-  //     axios.delete(`/api/people/${ID}`,)
-  //         .then(res => {
-  //             dispatch('getPeople')
-  //         })
-  //         .catch(err => {
-  //             console.log(err)
-  //         })
-  // },
-  //
-  // updatePerson({}, data) {
-  //     axios.patch(`/api/people/${data.ID}`,
-  //         {
-  //             SECOND_NAME: data.SECOND_NAME,
-  //             LAST_NAME: data.LAST_NAME,
-  //             ASSIGNED_BY_ID: data.ASSIGNED_BY_ID,
-  //             LEAD_ID: data.LEAD_ID,
-  //         })
-  //         .then(res => {
-  //             router.push({ SECOND_NAME:'person.show', params: {id: data.ID }})
-  //         })
-  //         .catch(
-  //             (error) => {
-  //                 console.log(error)
-  //             })
-  // },
+  }
 };
 var mutations = {
   setPerson: function setPerson(state, person) {
@@ -67421,7 +67221,7 @@ module.exports = JSON.parse('{"name":"axios","version":"0.21.4","description":"P
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames not based on template
-/******/ 			if ({"resources_js_components_Person_Table_vue":1,"resources_js_components_Person_Login_vue":1,"resources_js_components_Person_Registration_vue":1,"resources_js_components_Person_personal_vue":1}[chunkId]) return "js/" + chunkId + ".js";
+/******/ 			if ({"resources_js_components_Person_Table_vue":1,"resources_js_components_Person_Login_vue":1,"resources_js_components_Person_Registration_vue":1,"resources_js_components_Person_Personal_vue":1}[chunkId]) return "js/" + chunkId + ".js";
 /******/ 			// return url for filenames based on template
 /******/ 			return undefined;
 /******/ 		};

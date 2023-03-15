@@ -34,7 +34,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     Select2MultipleControl: v_select2_multiple_component__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
   mounted: function mounted() {
-    this.$store.dispatch('getPeople');
+    this.$store.dispatch('getEntities');
   },
   methods: {
     onlyActiveDepartmentSelect: function onlyActiveDepartmentSelect(id) {
@@ -67,7 +67,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       var state = _ref.state,
         commit = _ref.commit,
         dispatch = _ref.dispatch;
-      axios.post('/api/people/lead', {
+      axios.post('/api/entities/get', {
         'onlyActiveDepartments': this.onlyActiveDepartments,
         'Departments': this.Departments
       })["catch"](function (error) {

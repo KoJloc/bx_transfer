@@ -38,7 +38,7 @@ export default {
     },
 
     mounted() {
-        this.$store.dispatch('getPeople')
+        this.$store.dispatch('getEntities')
     },
 
     methods: {
@@ -71,14 +71,13 @@ export default {
         },
 
         storeSettings({state, commit, dispatch}) {
-            axios.post('/api/people/lead', {'onlyActiveDepartments': this.onlyActiveDepartments, 'Departments': this.Departments} )
+            axios.post('/api/entities/get', {'onlyActiveDepartments': this.onlyActiveDepartments, 'Departments': this.Departments} )
                 .catch(
                     (error) => {
                         console.log(error)
                     })
         },
     },
-
 
     computed: {
         ...

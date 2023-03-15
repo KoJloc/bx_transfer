@@ -9,9 +9,9 @@ const router = new VueRouter({
     mode: 'history',
     routes: [
         {
-            path: '/people',
+            path: '/entities',
             component: () => import('./components/Person/Table.vue'),
-            name: 'person.index'
+            name: 'entities.index'
         },
         {
             path: '/user/login',
@@ -25,7 +25,7 @@ const router = new VueRouter({
         },
         {
             path: '/user/personal',
-            component: () => import('./components/Person/personal.vue'),
+            component: () => import('./components/Person/Personal.vue'),
             name: 'user.personal'
         },
         ],

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Person;
+namespace App\Http\Controllers\Entities;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CRest;
@@ -12,9 +12,6 @@ class UserController extends Controller
     }
     public function __invoke()
     {
-
-        define('C_REST_WEB_HOOK_URL', 'https://xn--24-9kc.xn--d1ao9c.xn--p1ai/rest/53083/b4ye1avz6dmkned1/');//url on creat Webhook
-
         $people = CRest::firstBatch('user.get', [
             'FILTER' => [
                 'USER_TYPE' => 'employee'
@@ -25,7 +22,7 @@ class UserController extends Controller
                 'id' => $person['ID'],
                 'text' => $person['LAST_NAME'] . ' ' . $person['NAME'] . ' ' . $person['SECOND_NAME']
             ];
-            if ($person['ACTIVE'] === true) {
+            if ($person['ACTIVE'] == true) {
                 $this->activePeopleMultiSelect[] = $selectedPeople;
                 $this->peopleMultiSelect[] = $selectedPeople;
             } else {
@@ -35,9 +32,7 @@ class UserController extends Controller
                 ];
             }
         }
-
         return [
-//          'people' => count($people),
             'activePeopleMultiSelect' => $this->activePeopleMultiSelect,
             'peopleMultiSelect' => $this->peopleMultiSelect,
         ];

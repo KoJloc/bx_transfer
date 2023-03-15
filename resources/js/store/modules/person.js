@@ -23,8 +23,8 @@ const getters = {
 
 const actions = {
 
-    getPeople({state, commit, dispatch}) {
-        axios.post('/api/people')
+    getEntities({state, commit, dispatch}) {
+        axios.post('/api/entities')
             .then(res => {
                 commit('setPeople', res.data.people)
                 commit('myOptions', res.data.peopleMultiSelect)
@@ -36,74 +36,6 @@ const actions = {
                     console.log(error)
                 })
     },
-
-    storePeople({state, commit, dispatch}, myOptions) {
-        axios.post('/api/people/store',)
-            .catch(err => {
-                console.log(err)
-            })
-    },
-    //
-    //
-    // storePerson({}, data){
-    //     axios.post('/api/people/lead', {
-    //         ID: data.id,
-    //     })
-    //         .then(res => {
-    //             console.log(res)
-    //         })
-    //         .catch(err => {
-    //             console.log(err)
-    //         })
-    // },
-    //
-    // getLead({state, commit, dispatch}) {
-    //     axios.post('/api/people/lead')
-    //         .then(res => {
-    //
-    //         })
-    // },
-
-    // getPerson({state, commit, dispatch}, ID) {
-    //     axios.post(`/api/people/${ID}`)
-    //         .then(res => {
-    //             commit('setPerson', res.data)
-    //             // console.log(res.data)
-    //         })
-    //         .catch(
-    //             (error) => {
-    //                 console.log(error)
-    //             })
-    // },
-    //
-    // deletePerson({state, commit, dispatch}, ID) {
-    //     axios.delete(`/api/people/${ID}`,)
-    //         .then(res => {
-    //             dispatch('getPeople')
-    //         })
-    //         .catch(err => {
-    //             console.log(err)
-    //         })
-    // },
-    //
-    // updatePerson({}, data) {
-    //     axios.patch(`/api/people/${data.ID}`,
-    //         {
-    //             SECOND_NAME: data.SECOND_NAME,
-    //             LAST_NAME: data.LAST_NAME,
-    //             ASSIGNED_BY_ID: data.ASSIGNED_BY_ID,
-    //             LEAD_ID: data.LEAD_ID,
-    //         })
-    //         .then(res => {
-    //             router.push({ SECOND_NAME:'person.show', params: {id: data.ID }})
-    //         })
-    //         .catch(
-    //             (error) => {
-    //                 console.log(error)
-    //             })
-    // },
-
-
 }
 
 const mutations = {

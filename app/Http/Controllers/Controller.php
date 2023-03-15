@@ -10,30 +10,17 @@ use App\Http\Controllers\CRest;
 
 class Controller extends BaseController
 {
-    public $peopleMultiSelect;
-    public $activePeopleMultiSelect;
-    public $markedLeadsById;
     public $markedPeople;
     public $markedActivePeople;
+    public $entitiesByEmployerId = [];
+
+
 
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     public function __construct()
     {
-//        $allEntitiesByPersonId = [
-//            'id' => [
-//                'contactId' =>
-//                    [
-//                        'leadId',
-//                    ],
-//                    [
-//                        'dealId',
-//                    ],
-//        ];
-
-        $this->peopleMultiSelect=[];
-        $this->activePeopleMultiSelect = [];
-        $this->markedLeadsById = [];
+        $this->entitiesByEmployerId = [];
         $this->markedPeople = [];
         $this->markedActivePeople = [];
     }
