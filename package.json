@@ -32,6 +32,8 @@
         "vuex": "^3.6.2"
     },
     "dependencies": {
-        "vue-multiselect": "^2.1.7"
+        "bootstrap-icons": "^1.10.3",
+        "vue-multiselect": "^2.1.7",
+        "vue2-datepicker": "^3.11.1"
     }
 }

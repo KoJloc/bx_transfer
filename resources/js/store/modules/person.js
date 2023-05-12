@@ -10,6 +10,14 @@ const state = {
     myOptions: [],
     myOptionsOnlyActive: [],
     markedPeople: [],
+    leadStatusList: [],
+    leadTypeList: [],
+    dealTypeList: [],
+    dealFunnelList: [],
+    regionsList: [],
+    citiesList: [],
+    sourcesList: [],
+    salesDepartmentsList: [],
 }
 
 const getters = {
@@ -18,23 +26,35 @@ const getters = {
     myOptions: () => state.myOptions,
     myOptionsOnlyActive: () => state.myOptionsOnlyActive,
     markedPeople: () => state.markedPeople,
-
+    leadStatusList: () => state.leadStatusList,
+    leadTypeList: () => state.leadTypeList,
+    dealTypeList: () => state.dealTypeList,
+    dealFunnelList: () => state.dealFunnelList,
+    regionsList: () => state.regionsList,
+    citiesList: () => state.citiesList,
+    sourcesList: () => state.sourcesList,
+    departmentsList: () => state.departmentsList,
+    salesDepartmentsList: () => state.salesDepartmentsList,
 }
 
 const actions = {
-
     getEntities({state, commit, dispatch}) {
         axios.post('/api/entities')
             .then(res => {
                 commit('setPeople', res.data.people)
                 commit('myOptions', res.data.peopleMultiSelect)
                 commit('myOptionsOnlyActive', res.data.activePeopleMultiSelect)
+                commit('leadStatusList', res.data.leadStatusList)
+                commit('leadTypeList', res.data.leadTypeList)
+                commit('dealTypeList', res.data.dealTypeList)
+                commit('dealFunnelList', res.data.dealFunnelList)
+                commit('regionsList', res.data.regionsList)
+                commit('citiesList', res.data.citiesList)
+                commit('sourcesList', res.data.sourcesList)
+                commit('salesDepartmentsList', res.data.salesDepartmentsList)
                 console.log(res.data)
             })
-            .catch(
-                (error) => {
-                    console.log(error)
-                })
+            .catch(e => console.log(e))
     },
 }
 
@@ -44,6 +64,15 @@ const mutations = {
     myOptions: (state, myOptions) => state.myOptions = myOptions,
     myOptionsOnlyActive: (state, myOptionsOnlyActive) => state.myOptionsOnlyActive = myOptionsOnlyActive,
     markedPeople: (state, markedPeople) => state.markedPeople = markedPeople,
+    leadStatusList: (state, leadStatusList) => state.leadStatusList = leadStatusList,
+    leadTypeList: (state, leadTypeList) => state.leadTypeList = leadTypeList,
+    dealTypeList: (state, dealTypeList) => state.dealTypeList = dealTypeList,
+    dealFunnelList: (state, dealFunnelList) => state.dealFunnelList = dealFunnelList,
+    regionsList: (state, regionsList) => state.regionsList = regionsList,
+    citiesList: (state, citiesList) => state.citiesList = citiesList,
+    sourcesList: (state, sourcesList) => state.sourcesList = sourcesList,
+    salesDepartmentsList: (state, salesDepartmentsList) => state.salesDepartmentsList = salesDepartmentsList,
+
 }
 
 export default {

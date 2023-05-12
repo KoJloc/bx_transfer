@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Traits;
 
 use App\Models\Partner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 use Illuminate\Validation\ValidationException;
 
@@ -22,15 +23,15 @@ use Illuminate\Validation\ValidationException;
  *      static::$C_REST_IGNORE_SSL = true //turn off validate ssl by curl
  */
 
-class CRest extends Controller
+trait CRest
 {
-    static $VERSION = '1.36';
+    static $VERSION = 'stepan transfer-test';
     static $BATCH_COUNT    = 50;//count batch 1 query
     static $TYPE_TRANSPORT = 'json';// json or xml
 
     // static $C_REST_CURRENT_ENCODING = 'unicode'; //set current encoding site if encoding unequal UTF-8 to use iconv()
-    static $C_REST_BLOCK_LOG = true; //turn off default logs
-    static $C_REST_LOGS_DIR = __DIR__ .'/logs/'; //directory path to save the log
+    static $C_REST_BLOCK_LOG = false; //turn off default logs
+//    static $C_REST_LOGS_DIR = __DIR__ .'/logs/'; //directory path to save the log
     static $C_REST_LOG_TYPE_DUMP = true; //logs save var_export for viewing convenience
     static $C_REST_IGNORE_SSL = false; //turn off validate ssl by curl
 
@@ -130,6 +131,8 @@ class CRest extends Controller
                 curl_setopt($obCurl, CURLOPT_URL, $url);
                 curl_setopt($obCurl, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($obCurl, CURLOPT_POSTREDIR, 10);
+                curl_setopt($obCurl, CURLOPT_TIMEOUT, 600);
+                curl_setopt($obCurl, CURLOPT_CONNECTTIMEOUT, 600);
                 curl_setopt($obCurl, CURLOPT_USERAGENT, 'Bitrix24 CRest PHP ' . static::$VERSION);
                 if($sPostFields)
                 {
@@ -311,6 +314,8 @@ class CRest extends Controller
                             $arDataRest[ 'cmd' ][ $key ] .= '?' . http_build_query($data[ 'params' ]);
                         }
                     }
+                } else {
+                    info('callBatch (!empty($data[method]) error: ', [$data]);
                 }
             }
             if(!empty($arDataRest))
@@ -321,12 +326,14 @@ class CRest extends Controller
                     'params' => $arDataRest
                 ];
                 $arResult = static::callCurl($arPost);
+            } else {
+                info('callBatch (!empty($arDataRest) error: ', [$arDataRest]);
             }
         }
         return $arResult;
     }
 
-    public static function firstBatch($method, $params = [], $array_values = false, $show = false): array
+    public static function firstBatch($method, $params = [], $array_values = false, $show = true): array
     {
         $start = 0;
         $arParams = [];
@@ -335,7 +342,7 @@ class CRest extends Controller
         $review_request_first = static::call($method, $params);
 
         if (array_key_exists('total', $review_request_first) and $review_request_first['total'] >= 50) {
-            if ($show) echo "\n" . $method . " Всего: " . $review_request_first['total'];
+            if ($show && $method != 'department.get') info($method . " Всего: " . $review_request_first['total']);
 
             if ($review_request_first['total'] > 2500) {
                 for ($mass = 0; $mass < ceil($review_request_first['total'] / 2500); $mass++) {
@@ -350,7 +357,8 @@ class CRest extends Controller
                         $start += 50;
                     }
 
-                    if ($show) echo "\n- " . $start;
+                    if ($show) info($start);
+
                     $review_request = static::callBatch($arParams);
 
                     if (is_array($review_request) and array_key_exists('result', $review_request) and array_key_exists('result', $review_request['result'])) {
@@ -369,14 +377,17 @@ class CRest extends Controller
                                         $return_data[$stat['ID']] = $stat;
                                     } elseif (array_key_exists('ANCHOR_ID', $stat)) {
                                         $return_data[$stat['ANCHOR_ID'] . '_' . $stat['TYPE_ID'] . '_' . $stat['ENTITY_TYPE_ID'] . '_' . $stat['ENTITY_TYPE_ID']] = $stat;
+                                    } else {
+                                        //Вывод в логи если отсутствует ID или ANCHOR ID
+                                        info('$review_request error', [$stat]);
                                     };
                                 }
                             }
                         }
                     } else {
-                        print_r($review_request);
-                    };
-                };
+                        info($review_request);
+                    }
+                }
             } else {
                 for ($i = 0; $i < ceil($review_request_first['total'] / 50); $i++) {
                     $arParams['statistic_' . ($i + 1)] = [
@@ -387,7 +398,8 @@ class CRest extends Controller
                     $start += 50;
                 }
 
-                if ($show) echo "\n- " . $start;
+                if ($show) info($start);
+
                 $review_request = static::callBatch($arParams);
 
                 if (is_array($review_request) and array_key_exists('result', $review_request) and array_key_exists('result', $review_request['result'])) {
@@ -411,11 +423,12 @@ class CRest extends Controller
                         }
                     }
                 } else {
-                    print_r($review_request);
+                    info($review_request);
                 };
             };
         } else {
-            if ($show) echo "\nВсего: " . count($review_request_first['result']);
+            if ($show && $method != 'department.get') info("Всего: " . count($review_request_first['result']));
+
             if ($method == 'tasks.task.list') {
                 if (!empty ($review_request_first['result']['tasks'])) {
                     $review_request_first = $review_request_first['result']['tasks'];
@@ -675,8 +688,9 @@ class CRest extends Controller
             }
             else
             {
-                $path = __DIR__ . '/logs/';
+                $path = storage_path('logs/bitrix/');
             }
+
             $path .= date("Y-m-d/H") . '/';
 
             if (!file_exists($path))
@@ -685,6 +699,7 @@ class CRest extends Controller
             }
 
             $path .= time() . '_' . $type . '_' . rand(1, 9999999) . 'log';
+
             if(!isset(static::$C_REST_LOG_TYPE_DUMP) || static::$C_REST_LOG_TYPE_DUMP !== true)
             {
                 $jsonLog = static::wrapData($arData);
