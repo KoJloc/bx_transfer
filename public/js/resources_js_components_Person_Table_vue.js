@@ -44,8 +44,11 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       dealFunnels: [],
       regions: [],
       sources: [],
-      departments: [],
       salesDepartments: [],
+      salesDepartmentsLead: [],
+      salesDepartmentsDeal: [],
+      salesDepartmentsContact: [],
+      salesDepartmentsList: [],
       salesDepartmentsChange: [],
       sourcesChange: [],
       //Date
@@ -54,7 +57,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       //Other
       aboutSource: '',
       city: '',
-      count: "50",
+      count: "0",
       result: [],
       types: [{
         text: 'Лиды',
@@ -82,6 +85,9 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   },
   methods: {
     ClearOnChange: function ClearOnChange() {
+      if (this.checkedType === 'all') {
+        this.salesDepartments = [];
+      }
       this.leadStatus = [];
       this.leadTypes = [];
       this.dealTypes = [];
@@ -89,6 +95,9 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       this.regions = [];
       this.sourcesChange = [];
       this.salesDepartmentsChange = [];
+      this.salesDepartmentsContact = [];
+      this.salesDepartmentsDeal = [];
+      this.salesDepartmentsLead = [];
     },
     StoreSettings: function StoreSettings(_ref) {
       var state = _ref.state,
@@ -107,7 +116,10 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         'city': this.city,
         'count': this.count,
         'sources': this.sources,
-        'salesDepartments': this.departments,
+        'salesDepartments': this.salesDepartments,
+        'salesDepartmentsLead': this.salesDepartmentsLead,
+        'salesDepartmentsDeal': this.salesDepartmentsDeal,
+        'salesDepartmentsContact': this.salesDepartmentsContact,
         'newSource': this.sourcesChange,
         'newSalesDepartment': this.salesDepartmentsChange,
         'fromDate': this.fromDate,
@@ -127,7 +139,9 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     regionsList: 'regionsList',
     sourcesList: 'sourcesList',
     departmentsList: 'departmentsList',
-    salesDepartmentsList: 'salesDepartmentsList'
+    salesDepartmentsLeadList: 'salesDepartmentsLeadList',
+    salesDepartmentsDealList: 'salesDepartmentsDealList',
+    salesDepartmentsContactList: 'salesDepartmentsContactList'
   }))
 });
 
@@ -165,7 +179,7 @@ var render = function render() {
       multiple: true,
       searchable: true,
       "internal-search": true,
-      "clear-on-select": false,
+      "clear-on-select": true,
       "close-on-select": false,
       "max-height": 600,
       "show-no-results": false,
@@ -211,7 +225,7 @@ var render = function render() {
       multiple: true,
       searchable: true,
       "internal-search": true,
-      "clear-on-select": false,
+      "clear-on-select": true,
       "close-on-select": false,
       "max-height": 600,
       "show-no-results": false,
@@ -297,7 +311,7 @@ var render = function render() {
       multiple: true,
       searchable: true,
       "internal-search": true,
-      "clear-on-select": false,
+      "clear-on-select": true,
       "close-on-select": false,
       "max-height": 600,
       "show-no-results": false,
@@ -350,7 +364,7 @@ var render = function render() {
       multiple: true,
       searchable: true,
       "internal-search": true,
-      "clear-on-select": false,
+      "clear-on-select": true,
       "close-on-select": false,
       "max-height": 600,
       "show-no-results": false,
@@ -400,7 +414,7 @@ var render = function render() {
       multiple: true,
       searchable: true,
       "internal-search": true,
-      "clear-on-select": false,
+      "clear-on-select": true,
       "close-on-select": false,
       "max-height": 600,
       "show-no-results": false,
@@ -448,7 +462,7 @@ var render = function render() {
       multiple: true,
       searchable: true,
       "internal-search": true,
-      "clear-on-select": false,
+      "clear-on-select": true,
       "close-on-select": false,
       "max-height": 600,
       "show-no-results": false,
@@ -572,7 +586,7 @@ var render = function render() {
       multiple: true,
       searchable: true,
       "internal-search": true,
-      "clear-on-select": false,
+      "clear-on-select": true,
       "close-on-select": false,
       "max-height": 600,
       "show-no-results": false,
@@ -738,14 +752,14 @@ var render = function render() {
     }
   })]) : _vm._e(), _vm._v(" "), _c("div", {
     staticClass: "col-sm-3 d-flex flex-column"
-  }, [_vm._m(12), _vm._v(" "), _c("multiselect", {
+  }, [_vm._m(12), _vm._v(" "), !["all"].includes(_vm.checkedType) ? _c("multiselect", {
     attrs: {
       id: "departmentsSelect",
       label: "text",
       "track-by": "text",
-      placeholder: "Отдел продаж",
+      placeholder: this.checkedType === "lead" ? "Отдел продаж Лиды" : this.checkedType === "deal" ? "Отдел продаж Сделки" : "Отдел продаж Контакты",
       "open-direction": "bottom",
-      options: _vm.salesDepartmentsList,
+      options: this.checkedType === "lead" ? this.salesDepartmentsLeadList : this.checkedType === "deal" ? this.salesDepartmentsDealList : this.salesDepartmentsContactList,
       multiple: true,
       searchable: true,
       "internal-search": true,
@@ -771,20 +785,158 @@ var render = function render() {
           }
         })])];
       }
-    }]),
+    }], null, false, 3205273384),
     model: {
-      value: _vm.departments,
+      value: _vm.salesDepartments,
       callback: function callback($$v) {
-        _vm.departments = $$v;
+        _vm.salesDepartments = $$v;
       },
-      expression: "departments"
+      expression: "salesDepartments"
     }
   }, [_vm._v(" "), _c("span", {
     attrs: {
       slot: "noResult"
     },
     slot: "noResult"
-  }, [_vm._v("Oops! No elements found. Consider changing the search query.")])])], 1), _vm._v(" "), _c("div", {
+  }, [_vm._v("Oops! No elements found. Consider changing the search query.")])]) : _vm._e(), _vm._v(" "), ["all"].includes(_vm.checkedType) ? [_c("multiselect", {
+    attrs: {
+      id: "departmentsSelect",
+      label: "text",
+      "track-by": "text",
+      placeholder: "Отдел продаж Лиды",
+      "open-direction": "bottom",
+      options: _vm.salesDepartmentsLeadList,
+      multiple: true,
+      searchable: true,
+      "internal-search": true,
+      "clear-on-select": false,
+      "close-on-select": false,
+      "max-height": 600,
+      "show-no-results": false,
+      "hide-selected": true
+    },
+    scopedSlots: _vm._u([{
+      key: "tag",
+      fn: function fn(_ref11) {
+        var option = _ref11.option,
+          remove = _ref11.remove;
+        return [_c("span", {
+          staticClass: "multiselect__tag"
+        }, [_c("span", [_vm._v(_vm._s(option.text))]), _vm._v(" "), _c("span", {
+          staticClass: "multiselect__tag-icon",
+          on: {
+            click: function click($event) {
+              return remove(option);
+            }
+          }
+        })])];
+      }
+    }], null, false, 3205273384),
+    model: {
+      value: _vm.salesDepartmentsLead,
+      callback: function callback($$v) {
+        _vm.salesDepartmentsLead = $$v;
+      },
+      expression: "salesDepartmentsLead"
+    }
+  }, [_vm._v(" "), _c("span", {
+    attrs: {
+      slot: "noResult"
+    },
+    slot: "noResult"
+  }, [_vm._v("Oops! No elements found. Consider changing the search query.")])]), _vm._v(" "), _c("multiselect", {
+    attrs: {
+      id: "departmentsSelect",
+      label: "text",
+      "track-by": "text",
+      placeholder: "Отдел продаж Сделки",
+      "open-direction": "bottom",
+      options: _vm.salesDepartmentsDealList,
+      multiple: true,
+      searchable: true,
+      "internal-search": true,
+      "clear-on-select": false,
+      "close-on-select": false,
+      "max-height": 600,
+      "show-no-results": false,
+      "hide-selected": true
+    },
+    scopedSlots: _vm._u([{
+      key: "tag",
+      fn: function fn(_ref12) {
+        var option = _ref12.option,
+          remove = _ref12.remove;
+        return [_c("span", {
+          staticClass: "multiselect__tag"
+        }, [_c("span", [_vm._v(_vm._s(option.text))]), _vm._v(" "), _c("span", {
+          staticClass: "multiselect__tag-icon",
+          on: {
+            click: function click($event) {
+              return remove(option);
+            }
+          }
+        })])];
+      }
+    }], null, false, 3205273384),
+    model: {
+      value: _vm.salesDepartmentsDeal,
+      callback: function callback($$v) {
+        _vm.salesDepartmentsDeal = $$v;
+      },
+      expression: "salesDepartmentsDeal"
+    }
+  }, [_vm._v(" "), _c("span", {
+    attrs: {
+      slot: "noResult"
+    },
+    slot: "noResult"
+  }, [_vm._v("Oops! No elements found. Consider changing the search query.")])]), _vm._v(" "), _c("multiselect", {
+    attrs: {
+      id: "departmentsSelect",
+      label: "text",
+      "track-by": "text",
+      placeholder: "Отдел продаж Контакты",
+      "open-direction": "bottom",
+      options: _vm.salesDepartmentsContactList,
+      multiple: true,
+      searchable: true,
+      "internal-search": true,
+      "clear-on-select": false,
+      "close-on-select": false,
+      "max-height": 600,
+      "show-no-results": false,
+      "hide-selected": true
+    },
+    scopedSlots: _vm._u([{
+      key: "tag",
+      fn: function fn(_ref13) {
+        var option = _ref13.option,
+          remove = _ref13.remove;
+        return [_c("span", {
+          staticClass: "multiselect__tag"
+        }, [_c("span", [_vm._v(_vm._s(option.text))]), _vm._v(" "), _c("span", {
+          staticClass: "multiselect__tag-icon",
+          on: {
+            click: function click($event) {
+              return remove(option);
+            }
+          }
+        })])];
+      }
+    }], null, false, 3205273384),
+    model: {
+      value: _vm.salesDepartmentsContact,
+      callback: function callback($$v) {
+        _vm.salesDepartmentsContact = $$v;
+      },
+      expression: "salesDepartmentsContact"
+    }
+  }, [_vm._v(" "), _c("span", {
+    attrs: {
+      slot: "noResult"
+    },
+    slot: "noResult"
+  }, [_vm._v("Oops! No elements found. Consider changing the search query.")])])] : _vm._e()], 2), _vm._v(" "), _c("div", {
     staticClass: "col-sm-3 d-flex flex-column"
   }, [_vm._m(13), _vm._v(" "), _c("multiselect", {
     attrs: {
@@ -805,9 +957,9 @@ var render = function render() {
     },
     scopedSlots: _vm._u([{
       key: "tag",
-      fn: function fn(_ref11) {
-        var option = _ref11.option,
-          remove = _ref11.remove;
+      fn: function fn(_ref14) {
+        var option = _ref14.option,
+          remove = _ref14.remove;
         return [_c("span", {
           staticClass: "multiselect__tag"
         }, [_c("span", [_vm._v(_vm._s(option.text))]), _vm._v(" "), _c("span", {

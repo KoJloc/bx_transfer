@@ -33,7 +33,9 @@
     },
     "dependencies": {
         "bootstrap-icons": "^1.10.3",
+        "echarts": "^5.4.2",
         "vue-multiselect": "^2.1.7",
+        "vue-toastification": "^1.7.14",
         "vue2-datepicker": "^3.11.1"
     }
 }

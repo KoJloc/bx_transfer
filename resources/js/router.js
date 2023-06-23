@@ -3,7 +3,8 @@ import VueRouter from 'vue-router'
 import History from './components/History.vue'
 import Users from './components/Users.vue'
 import Show from './components/Show.vue'
-
+import Dashboard from './components/Dashboard.vue'
+import Table from './components/Person/Table.vue'
 
 Vue.use(VueRouter)
 
@@ -12,7 +13,7 @@ const router = new VueRouter({
     routes: [
         {
             path: '/entities',
-            component: () => import('./components/Person/Table.vue'),
+            component: Table,
             name: 'entities.index'
         },
         {
@@ -26,9 +27,14 @@ const router = new VueRouter({
             name: 'history.show'
         },
         {
-            path: '/users',
+            path: '/users/get',
             component: Users,
             name: 'users.index'
+        },
+        {
+            path: '/dashboard',
+            component: Dashboard,
+            name: 'dashboard.index'
         },
         // {
         //     path: '/user/login',

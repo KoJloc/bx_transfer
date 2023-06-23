@@ -1,228 +1,175 @@
 <template>
-<div class="container-fluid">
-<div class="container">
-<div class="row">
-	<div class="relative flex w-72">
-		<input v-model.trim="SearchData" id="goodsSearchButton" data-dropdown-toggle="goodsSearch" type="search" class="w-full px-5 py-2.5 text-sm rounded-lg bg-gray-50 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white searcher" placeholder="Введите имя, должность или id" />
-		<div class="absolute top-0 right-0 flex items-center px-4 py-2.5 space-x-1">
-			<button @click="Search()">
-				<svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-				</svg>
-			</button>
-			<button @click="SetFilterDefaults()">
-				<span class="w-5 h-5 text-red-600">✖</span>
-			</button>
-		</div>
-	</div>
-</div>
-
-<div class="row">
-	<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-		<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-			<tr>
-				<th scope="col" class="px-6 py-3">Id</th>
-				<th scope="col" class="px-6 py-3">ФИО</th>
-			</tr>
-		</thead>
-		<tbody v-for="user in myOptionsOnlyActive">
-			<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-				<td scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-					{{ user.id }}
-				</td>
-				<td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-					{{ user.text }}
-				</td>
-			</tr>
-		</tbody>
-	</table>
-</div>
-
-<!-- pagination -->
-<div class="row">
-	<button v-if="Page > 1" @click="Previous()" class="col-2 m-4 p-2">Назад</button>
-	<button v-if="!IsLastPage" @click="Next()" class="col-2 m-4 p-2">Вперёд</button>
-</div>
-</div>
-</div>
+  <div class="container-fluid">
+    <div class="container">
+      <form class="pt-2">
+        <div class="row mb-2">
+          <div class="col-sm-4">
+            <input v-model.trim="SearchData" id="SearchInput" type="search" class="form-control"
+                   placeholder="Введите ФИО сотрудника" @keyup.enter="Search()">
+          </div>
+            <div class="col-sm-3">
+              <button class="btn btn-outline-success" type="button" @click="Search()">Поиск</button>
+              <button class="btn btn-outline-danger" type="button" @click="SetFilterDefaults()">Сброс</button>
+            </div>
+        </div>
+        <div class="row mb-3">
+          <p style="display:none;" for="DateInput" class="col-sm-2 col-form-label">Поиск по дате создания </p>
+          <div style="display:none;" class="col-sm-6">
+            <date-picker style="display:none;" id="DateInput" class="custom-datepicker" v-model.trim="SearchDate" type="datetime" range valueType="format"></date-picker>
+          </div>
+        </div>
+      </form>
+      <div class="row p-3">
+        <table class="table table-hover">
+          <thead>
+          <tr>
+            <th scope="col" class="px-6 py-3">#</th>
+            <th scope="col" class="px-6 py-3"></th>
+            <th scope="col" class="px-6 py-3">ФИО</th>
+            <th scope="col" class="px-6 py-3">Должность</th>
+            <th scope="col" class="px-6 py-3">Уволен</th>
+            <th scope="col" class="px-6 py-3">Доступ</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-for="user in Data">
+            <th scope="row">{{ user.id }}</th>
+            <td><img class="img-thumbnail" style="width: 50px; height: 50px" :src="user.image"/></td>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.job }}</td>
+            <td>{{ user.active === 1 ? 'Не уволен' : 'Уволен' }}</td>
+            <td>
+              <div class="form-check form-switch align-items-center">
+                <input class="form-check-input" v-model="user.verified" @change="VerifyUser(user.id, user.verified)"
+                       type="checkbox" role="switch">
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- pagination -->
+      <div class="row" v-if="!(Pagination.total <= Pagination.per_page)">
+        <nav aria-label="Навигация">
+          <ul class="pagination">
+            <li class="page-item">
+              <button @click="Previous()" :disabled="Page == 1" class="page-link">Previous</button>
+            </li>
+            <li v-for="link in Pagination.links" class="page-item">
+              <template v-if="Number(link.label) &&
+                      (Pagination.current_page - link.label < 3 &&
+                      Pagination.current_page - link.label > -3) ||
+                      Number(link.label) === 1 ||  Number(link.label) === Pagination.last_page">
+                <a @click="Search(link.label)" class="page-link" :class="link.active ?  'active' : ''"
+                   href="#">{{ link.label }}</a>
+              </template>
+              <template v-if="Number(link.label) &&
+                        Pagination.current_page !== 4 &&
+                      (Pagination.current_page - link.label === 3) ||
+                          Number(link.label) &&
+                          Pagination.current_page !== Pagination.last_page - 2 &&
+                          Pagination.current_page + 3 !== Pagination.last_page  &&
+                      (Pagination.current_page - link.label === -3)">
+                <a class="page-link">...</a>
+              </template>
+            </li>
+            <li class="page-item">
+              <button @click="Next()" :disabled="IsLastPage" class="page-link">Next</button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import DatePicker from 'vue2-datepicker'
 
 export default {
-	name: 'Users',
-	data() {
-		return {
-			Data: Array(),
-			SearchData: String(),
-			Page: Number(1),
-			IsLastPage: Boolean(),
-			PerPage: Number(20),
-		}
-	},
-	mounted() {
-		//this.GetHistory()
-	},
-	methods: {
-		GetHistory(page = 1) {
-			let url = `/api/histories/test?page=${page}
-				&search=${this.SearchData}
-				&limit=${this.PerPage}`
+  name: 'History',
 
-			axios.post(url).then(r => {
-				let p = r.data.data
-				console.log(p)
-				this.Data = p.data
-				this.IsLastPage = p.current_page == p.last_page
-				console.log(this.IsLastPage)
-				// this.PreparePagination(p)
-			}).catch(e => console.log(e))
-		},
-		Previous() {
-			if (this.Page <= 1) {
-				console.log("this.Page = 1")
-				this.Page = 1
-				return
-			}
-			
-			this.Page--
-			this.Search(this.Page)
-		},
-		Next() {
-			if (this.IsLastPage) {
-				console.log(this.IsLastPage)
-				return
-			}
-			
-			this.Page++
-			this.Search(this.Page)
-		},
-		Search(page = 1) {
-			this.GetHistory(page)
-			this.SetFilterDefaults()
-		},
-		SetFilterDefaults() {
-			this.SearchData = ''
-		},
-		storeSettings({state, commit, dispatch}) {
-			axios.post('/api/entities/get', {
-				'onlyActiveDepartments': this.fromUsers,
-			}).catch(e => console.log(e))
-		},
-	},
-
-  watch: {
-    fromUsers(newValue, oldValue) {
-      if (oldValue.length > newValue.length) {
-        this.result = oldValue.filter(el => !newValue.includes(el));
-      } else {
-        this.result = newValue.filter(el => !oldValue.includes(el));
-      }
-      for (let i = 0; i < this.Departments.length; i++) {
-        if (this.result[0].id === this.Departments[i]) {
-          this.Departments.splice(i, 1)
-          // console.log('Удаляем совпадение')
-          console.log(this.Departments)
-          return
-        }
-      }
-      this.Departments.push(this.result[0].id)
-      console.log(this.Departments)
-    },
-
-    toUsers(newValue, oldValue) {
-      if (oldValue.length > newValue.length) {
-        this.result = oldValue.filter(el => !newValue.includes(el));
-      } else {
-        this.result = newValue.filter(el => !oldValue.includes(el));
-      }
-      for (let i = 0; i < this.onlyActiveDepartments.length; i++) {
-        if (this.result[0].id === this.onlyActiveDepartments[i]) {
-          this.onlyActiveDepartments.splice(i, 1)
-          // console.log('Удаляем совпадение')
-          console.log(this.onlyActiveDepartments)
-          return
-        }
-      }
-      this.onlyActiveDepartments.push(this.result[0].id)
-      console.log(this.onlyActiveDepartments)
-    },
-    leadStatus(newValue, oldValue) {
-      if (oldValue.length > newValue.length) {
-        this.result = oldValue.filter(el => !newValue.includes(el));
-      } else {
-        this.result = newValue.filter(el => !oldValue.includes(el));
-      }
-      for (let i = 0; i < this.leadStatusNew.length; i++) {
-        if (this.result[0].id === this.leadStatusNew[i]) {
-          this.leadStatusNew.splice(i, 1)
-          // console.log('Удаляем совпадение')
-          console.log(this.leadStatusNew)
-          return
-        }
-      }
-      this.leadStatusNew.push(this.result[0].id)
-      console.log(this.leadStatusNew)
-    },
-    leadType(newValue, oldValue) {
-      if (oldValue.length > newValue.length) {
-        this.result = oldValue.filter(el => !newValue.includes(el));
-      } else {
-        this.result = newValue.filter(el => !oldValue.includes(el));
-      }
-      for (let i = 0; i < this.leadTypeNew.length; i++) {
-        if (this.result[0].id === this.leadTypeNew[i]) {
-          this.leadTypeNew.splice(i, 1)
-          // console.log('Удаляем совпадение')
-          console.log(this.leadTypeNew)
-          return
-        }
-      }
-      this.leadTypeNew.push(this.result[0].id)
-      console.log(this.leadTypeNew)
-    },
-    dealType(newValue, oldValue) {
-      if (oldValue.length > newValue.length) {
-        this.result = oldValue.filter(el => !newValue.includes(el));
-      } else {
-        this.result = newValue.filter(el => !oldValue.includes(el));
-      }
-      for (let i = 0; i < this.dealTypeNew.length; i++) {
-        if (this.result[0].id === this.dealTypeNew[i]) {
-          this.dealTypeNew.splice(i, 1)
-          // console.log('Удаляем совпадение')
-          console.log(this.dealTypeNew)
-          return
-        }
-      }
-      this.dealTypeNew.push(this.result[0].id)
-      console.log(this.dealTypeNew)
-    },
-    dealFunnel(newValue, oldValue) {
-      if (oldValue.length > newValue.length) {
-        this.result = oldValue.filter(el => !newValue.includes(el));
-      } else {
-        this.result = newValue.filter(el => !oldValue.includes(el));
-      }
-      for (let i = 0; i < this.dealFunnelNew.length; i++) {
-        if (this.result[0].id === this.dealFunnelNew[i]) {
-          this.dealFunnelNew.splice(i, 1)
-          // console.log('Удаляем совпадение')
-          console.log(this.dealFunnelNew)
-          return
-        }
-      }
-      this.dealFunnelNew.push(this.result[0].id)
-      console.log(this.dealFunnelNew)
-    },
+  components: {
+    DatePicker
   },
 
-  computed: {
-    ...mapGetters({
-      myOptions: 'myOptions',
-      myOptionsOnlyActive: 'myOptionsOnlyActive',
-    }),
+  data() {
+    return {
+      Data: Array(),
+      Pagination: Array(),
+      SearchData: String(),
+      SearchDate: String(),
+      Page: Number(1),
+      Waiting: Boolean(),
+      IsLastPage: Boolean(),
+      PerPage: Number(12),
+      Rofl: true,
+    }
+  },
+  mounted() {
+    if(typeof(this.$route.params.page) != "undefined" && this.$route.params.page !== null ){
+      this.Page = this.$route.params.page
+    }
+
+    this.GetHistory(this.Page)
+  },
+  methods: {
+    GetHistory(page = 1) {
+      if (this.Waiting) return
+
+      this.Waiting = true
+      let url = `/api/users/get?page=${page}
+				&search=${this.SearchData}
+				&date=${this.SearchDate}
+				&limit=${this.PerPage}`
+
+      axios.post(url).then(r => {
+        let p = r.data.data
+
+        if (p.data.length == 0) {
+          this.IsLastPage = true
+          return
+        }
+
+        this.Data = p.data
+        this.Pagination = r.data.data
+        this.IsLastPage = p.current_page == p.last_page
+      }).catch(e => console.log(e))
+          .finally(() => this.Waiting = false)
+    },
+    VerifyUser(id, verified) {
+      axios.post('https://transfer-test.stepan.sms19.ru/api/users/verify', {
+        'id': id,
+        'verified': verified
+      }).catch(e => console.log(e))
+    },
+    Previous() {
+      if (this.Page <= 1) {
+        this.Page = 1
+        return
+      }
+
+      this.Page--
+      this.Search(this.Page)
+    },
+    Next() {
+      if (this.IsLastPage) {
+        return
+      }
+
+      this.Page++
+      this.Search(this.Page)
+    },
+    Search(page = 1) {
+      this.Page = page
+      this.GetHistory(page)
+      this.SetFilterDefaults()
+    },
+    SetFilterDefaults() {
+      this.SearchDate = ''
+      this.SearchData = ''
+      this.GetHistory()
+    },
   },
 }
 </script>

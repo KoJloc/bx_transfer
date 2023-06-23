@@ -87,23 +87,4 @@ class HistoryController extends Controller
     {
         //
     }
-
-
-    public function test()
-    {
-        $search = request('search');
-        $limit = (int)request('limit');
-
-        $histories = DB::table('transfer_groups')
-            ->when(!empty($search), function ($q) use ($search) {
-                $q->whereId($search);
-            })
-            ->select('id', 'transfer_group_status', 'rollback_status', 'created_at', 'updated_at')
-            ->paginate($limit < 1 ? 10 : $limit);
-
-        return response()->json([
-            "data" => $histories
-        ]);
-    }
-
 }

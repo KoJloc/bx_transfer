@@ -144,10 +144,10 @@ class EntitiesRollbackController extends Controller
         $newEmployers = [];
 
         foreach ($entities as $entity) {
-            if (!in_array($entity['old_responsible_ID'], $oldEmployers)) {
+            if (!in_array($entity['new_responsible_ID'], $oldEmployers)) {
                 $oldEmployers[] = $entity['new_responsible_ID'];
             }
-            if (!in_array($entity['new_responsible_ID'], $newEmployers)) {
+            if (!in_array($entity['old_responsible_ID'], $newEmployers)) {
                 $newEmployers[] = $entity['old_responsible_ID'];
             }
         }
@@ -235,7 +235,7 @@ class EntitiesRollbackController extends Controller
         $employersString = $this->generateEmployersStringToMessages($transferGroup);
         $messageTransferNumber = $transferGroup;
         $sendMessage = CRest::call('im.message.add', [
-            'DIALOG_ID' => 'chat534425', // test chat534425 main chat568134
+            'DIALOG_ID' => 'chat568134', // test chat534425 main chat568134
             'MESSAGE' => "
 Запущен откат передачи №{$messageTransferNumber}: \r
 

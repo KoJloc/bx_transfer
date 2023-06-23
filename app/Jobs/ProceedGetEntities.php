@@ -19,17 +19,11 @@ class ProceedGetEntities implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, CRest;
 
-    protected $fromUsers, $toUsers;
+    protected $fromUsers, $toUsers, $response;
 
-    public $tries = 1;
-
+    public $tries = 3;
+    public $backoff = 15;
     public $uniqueFor = 3600;
-
-    public function middleware()
-    {
-        return [new WithoutOverlapping($this->response->id)];
-    }
-
     public function uniqueId(): string
     {
         return $this->response->id;
@@ -40,8 +34,9 @@ class ProceedGetEntities implements ShouldQueue, ShouldBeUnique
      *
      * @return void
      */
-    public function __construct( $fromUsers, $toUsers)
+    public function __construct($response, $fromUsers, $toUsers)
     {
+        $this->response = $response;
         $this->fromUsers = $fromUsers;
         $this->toUsers = $toUsers;
     }
@@ -62,9 +57,7 @@ class ProceedGetEntities implements ShouldQueue, ShouldBeUnique
         $leads = CRest::firstBatch('crm.lead.list', [
             'filter' => [
                 'ASSIGNED_BY_ID' => $this->fromUsers['from'],
-                '!STATUS_ID' => 'CONVERTED',
-//                '!UF_CRM_1561882407' => 4331,
-//                '>DATE_CREATE' => date("Y-m-d", strtotime('2023-01-01')) . "T00:00:00+00:00",
+                '!STATUS_ID' => ['CONVERTED', 'JUNK'],
             ],
             'select' => [
                 'ID',
@@ -90,8 +83,10 @@ class ProceedGetEntities implements ShouldQueue, ShouldBeUnique
                 'ASSIGNED_BY_ID',
             ],
         ]);
-//        info($leads, $deals, $contacts);
 //--------------------------------------Обрабатываем_сущности---------------------------------------------------------//
+        $this->leadActivityOwnersId = [];
+        $this->otherActivityOwnersId = [];
+
         if (isset($leads)) {
             //Перебор массива лидов
             foreach ($leads as $lead) {
@@ -100,7 +95,7 @@ class ProceedGetEntities implements ShouldQueue, ShouldBeUnique
                 //Создаем фильтр для task'ов лидов
                 $this->taskFilter['UF_CRM_TASK'][] = 'L_' . $lead['ID'];
                 //Создаем фильтр для активити
-                $this->activityOwnersId[] = $lead['ID'];
+                $this->leadActivityOwnersId[] = $lead['ID'];
             }
         }
 
@@ -112,7 +107,7 @@ class ProceedGetEntities implements ShouldQueue, ShouldBeUnique
                 //Создаем фильтр для task'ов сделок
                 $this->taskFilter['UF_CRM_TASK'][] = 'D_' . $deal['ID'];
                 //Создаем фильтр для активити
-                $this->activityOwnersId[] = $deal['ID'];
+                $this->otherActivityOwnersId[] = $deal['ID'];
             }
         }
 
@@ -124,17 +119,16 @@ class ProceedGetEntities implements ShouldQueue, ShouldBeUnique
                 //Создаем фильтр для task'ов контактов
                 $this->taskFilter['UF_CRM_TASK'][] = 'C_' . $contact['ID'];
                 //Создаем фильтр для активити
-                $this->activityOwnersId[] = $contact['ID'];
+                $this->otherActivityOwnersId[] = $contact['ID'];
             }
         }
-//        info($leads, $deals, $contacts);
 
 //--------------------------------------------------------Таски-------------------------------------------------------//
 
         if ((empty($leads) && empty($deals) && empty($contacts))) return 'error';
 
         $tasks = [];
-        $taskFilterChunks = array_chunk($this->taskFilter['UF_CRM_TASK'], 1000);
+        $taskFilterChunks = array_chunk($this->taskFilter['UF_CRM_TASK'], 500);
         unset($this->taskFilter);
 
         foreach ($taskFilterChunks as $chunk) {
@@ -156,7 +150,6 @@ class ProceedGetEntities implements ShouldQueue, ShouldBeUnique
                 }
             }
         }
-//        info($tasks);
 
         foreach ($tasks as $task) {
             if (!empty($task['ufCrmTask'])) {
@@ -176,29 +169,54 @@ class ProceedGetEntities implements ShouldQueue, ShouldBeUnique
 
 //----------------------------------------------------Активити--------------------------------------------------------//
         $activities = [];
-        $activityOwnersIdChunks = array_chunk($this->activityOwnersId, 1000);
-        unset($this->activityOwnersId);
+        if(count($this->leadActivityOwnersId) > 0) {
+            $leadActivityOwnersIdChunks = array_chunk($this->leadActivityOwnersId, 500);
+        }
+        if(count($this->otherActivityOwnersId) > 0) {
+            $otherActivityOwnersIdChunks = array_chunk($this->otherActivityOwnersId, 500);
+        }
+        unset($this->leadActivityOwnersId, $this->otherActivityOwnersId);
 
-        foreach ($activityOwnersIdChunks as $chunk) {
-            $activityFilter = [
-                'OWNER_ID' => $chunk,
-                'COMPLETED' => 'N',
-                'PROVIDER_ID' => ['VOXIMPLANT_CALL', 'CRM_MEETING'], //'VOXIMPLANT_CALL' 'CRM_MEETING' 'TASKS'
-                'RESPONSIBLE_ID' => $this->fromUsers['from'],
-            ];
+        if(isset($leadActivityOwnersIdChunks)) {
+            foreach ($leadActivityOwnersIdChunks as $chunk) {
+                $activityFilter = [
+                    'OWNER_ID' => $chunk,
+                    'COMPLETED' => 'N',
+                    'PROVIDER_ID' => ['VOXIMPLANT_CALL', 'CRM_MEETING'], //'VOXIMPLANT_CALL' 'CRM_MEETING' 'TASKS'
+                ];
 
-            $activitiesFromBitrix = CRest::firstBatch('crm.activity.list', [
-                'FILTER' => $activityFilter,
-            ]);
+                $activitiesFromBitrix = CRest::firstBatch('crm.activity.list', [
+                    'FILTER' => $activityFilter,
+                ]);
 
-            if (!empty($activitiesFromBitrix)) {
-                foreach ($activitiesFromBitrix as $item) {
-                    $activities[] = $item;
+                if (!empty($activitiesFromBitrix)) {
+                    foreach ($activitiesFromBitrix as $item) {
+                        $activities[] = $item;
+                    }
                 }
             }
         }
 
-//        info($activities);
+        if(isset($otherActivityOwnersIdChunks)) {
+            foreach ($otherActivityOwnersIdChunks as $chunk) {
+                $activityFilter = [
+                    'OWNER_ID' => $chunk,
+                    'COMPLETED' => 'N',
+                    'PROVIDER_ID' => ['VOXIMPLANT_CALL', 'CRM_MEETING'], //'VOXIMPLANT_CALL' 'CRM_MEETING' 'TASKS'
+                    'RESPONSIBLE_ID' => $this->fromUsers['from'],
+                ];
+
+                $activitiesFromBitrix = CRest::firstBatch('crm.activity.list', [
+                    'FILTER' => $activityFilter,
+                ]);
+
+                if (!empty($activitiesFromBitrix)) {
+                    foreach ($activitiesFromBitrix as $item) {
+                        $activities[] = $item;
+                    }
+                }
+            }
+        }
 
         foreach ($activities as $activity) {
             $ternar = $activity['OWNER_TYPE_ID'] == 2 ? 'deals' : 'contacts';

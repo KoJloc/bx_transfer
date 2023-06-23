@@ -17,7 +17,9 @@ const state = {
     regionsList: [],
     citiesList: [],
     sourcesList: [],
-    salesDepartmentsList: [],
+    salesDepartmentsLeadList: [],
+    salesDepartmentsDealList: [],
+    salesDepartmentsContactList: [],
 }
 
 const getters = {
@@ -34,7 +36,9 @@ const getters = {
     citiesList: () => state.citiesList,
     sourcesList: () => state.sourcesList,
     departmentsList: () => state.departmentsList,
-    salesDepartmentsList: () => state.salesDepartmentsList,
+    salesDepartmentsLeadList: () => state.salesDepartmentsLeadList,
+    salesDepartmentsDealList: () => state.salesDepartmentsDealList,
+    salesDepartmentsContactList: () => state.salesDepartmentsContactList,
 }
 
 const actions = {
@@ -51,7 +55,9 @@ const actions = {
                 commit('regionsList', res.data.regionsList)
                 commit('citiesList', res.data.citiesList)
                 commit('sourcesList', res.data.sourcesList)
-                commit('salesDepartmentsList', res.data.salesDepartmentsList)
+                commit('salesDepartmentsLeadList', res.data.salesDepartmentsLeadList)
+                commit('salesDepartmentsDealList', res.data.salesDepartmentsDealList)
+                commit('salesDepartmentsContactList', res.data.salesDepartmentsContactList)
                 console.log(res.data)
             })
             .catch(e => console.log(e))
@@ -71,8 +77,9 @@ const mutations = {
     regionsList: (state, regionsList) => state.regionsList = regionsList,
     citiesList: (state, citiesList) => state.citiesList = citiesList,
     sourcesList: (state, sourcesList) => state.sourcesList = sourcesList,
-    salesDepartmentsList: (state, salesDepartmentsList) => state.salesDepartmentsList = salesDepartmentsList,
-
+    salesDepartmentsLeadList: (state, salesDepartmentsLeadList) => state.salesDepartmentsLeadList = salesDepartmentsLeadList,
+    salesDepartmentsDealList: (state, salesDepartmentsDealList) => state.salesDepartmentsDealList = salesDepartmentsDealList,
+    salesDepartmentsContactList: (state, salesDepartmentsContactList) => state.salesDepartmentsContactList = salesDepartmentsContactList,
 }
 
 export default {

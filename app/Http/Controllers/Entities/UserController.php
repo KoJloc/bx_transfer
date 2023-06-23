@@ -27,7 +27,10 @@ class UserController extends Controller
         $citiesList = [];
         $regionList = [];
         $sourceList = [];
-        $salesDepartmentsList = [];
+        $salesDepartmentsLeadList = [];
+        $salesDepartmentsDealList = [];
+        $salesDepartmentsContactList = [];
+        $hotLeadList = [];
 
         if (\Cache::has('leadStatusList')) {
             $leadStatusList = \Cache::get('leadStatusList');
@@ -84,8 +87,8 @@ class UserController extends Controller
             }
             \Cache::put("regionList", $regionList, Carbon::now()->addMinutes(360));
         }
-        if (\Cache::has('salesDepartmentsList')) {
-            $salesDepartmentsList = \Cache::get('salesDepartmentsList');
+        if (\Cache::has('salesDepartmentsLeadList')) {
+            $salesDepartmentsLeadList = \Cache::get('salesDepartmentsLeadList');
         } else {
             $leadFilters = CRest::call('crm.lead.fields', [
                 'SELECT' => [
@@ -94,12 +97,48 @@ class UserController extends Controller
             ]);
 
             foreach ($leadFilters['result']['UF_CRM_1561882407']['items'] as $item) {
-                $salesDepartmentsList[] = [
+                $salesDepartmentsLeadList[] = [
                     'id' => $item['ID'],
                     'text' => $item['VALUE'],
                 ];
             }
-            \Cache::put("salesDepartmentsList", $salesDepartmentsList, Carbon::now()->addMinutes(360));
+            \Cache::put("salesDepartmentsLeadList", $salesDepartmentsLeadList, Carbon::now()->addMinutes(360));
+        }
+
+        if (\Cache::has('salesDepartmentsDealList')) {
+            $salesDepartmentsDealList = \Cache::get('salesDepartmentsDealList');
+        } else {
+            $deadFilters = CRest::call('crm.deal.fields', [
+                'SELECT' => [
+                    'UF_CRM_1561882407', // Отдел продаж
+                ],
+            ]);
+
+            foreach ($deadFilters['result']['UF_CRM_1561882407']['items'] as $item) {
+                $salesDepartmentsDealList[] = [
+                    'id' => $item['ID'],
+                    'text' => $item['VALUE'],
+                ];
+            }
+            \Cache::put("salesDepartmentsDealList", $salesDepartmentsDealList, Carbon::now()->addMinutes(360));
+        }
+
+        if (\Cache::has('salesDepartmentsContactList')) {
+            $salesDepartmentsContactList = \Cache::get('salesDepartmentsContactList');
+        } else {
+            $contactFilters = CRest::call('crm.contact.fields', [
+                'SELECT' => [
+                    'UF_CRM_5D19073319DA8', // Отдел продаж
+                ],
+            ]);
+
+            foreach ($contactFilters['result']['UF_CRM_5D19073319DA8']['items'] as $item) {
+                $salesDepartmentsContactList[] = [
+                    'id' => $item['ID'],
+                    'text' => $item['VALUE'],
+                ];
+            }
+            \Cache::put("salesDepartmentsContactList", $salesDepartmentsContactList, Carbon::now()->addMinutes(360));
         }
 
         if (\Cache::has('sourceList')) {
@@ -110,7 +149,7 @@ class UserController extends Controller
             foreach ($sourceIDs as $key => $value) {
                 if ($value['ENTITY_ID'] != 'SOURCE') continue;
                 $sourceList[] = [
-                    'id' => $value['ID'],
+                    'id' => $value['STATUS_ID'],
                     'text' => $value['NAME'],
                 ];
             }
@@ -161,35 +200,86 @@ class UserController extends Controller
             $this->peopleMultiSelect = \Cache::get('peopleMultiSelect');
             $this->activePeopleMultiSelect = \Cache::get('activePeopleMultiSelect');
         } else {
+            $departments = CRest::firstBatch('department.get');
+
+            foreach ($departments as $department) {
+                $this->peopleMultiSelect[] = [
+                    'department_id' => $department['ID'],
+                    'department' => $department['NAME'],
+                    'params' => [],
+                ];
+                $this->activePeopleMultiSelect[] = [
+                    'department_id' => $department['ID'],
+                    'department' => $department['NAME'],
+                    'params' => [],
+                ];
+            }
+
+            $this->activePeopleMultiSelect[] = [
+                'department_id' => 0,
+                'department' => 'Без отдела',
+                'params' => [],
+            ];
+            $this->peopleMultiSelect[] = [
+                'department_id' => 0,
+                'department' => 'Без отдела',
+                'params' => [],
+            ];
+
             $people = CRest::firstBatch('user.get');
 
             foreach ($people as $person) {
-                $selectedPeople = [
-                    'id' => $person['ID'],
-                    'text' => trim($person['LAST_NAME'] . ' ' . $person['NAME'] . ' ' . $person['SECOND_NAME']),
-                    'img' => $person['PERSONAL_PHOTO'],
-                    'job' => $person['WORK_POSITION'],
-                    'active' => $person['ACTIVE'],
-                ];
-                if ($person['ACTIVE']) {
-                    $this->activePeopleMultiSelect[] = $selectedPeople;
-                    $this->peopleMultiSelect[] = $selectedPeople;
-                } else {
-                    $this->peopleMultiSelect[] = [
-                        'id' => $person['ID'],
-                        'text' => trim($person['LAST_NAME'] . ' ' . $person['NAME'] . ' ' . $person['SECOND_NAME']),
-                        'img' => $person['PERSONAL_PHOTO'],
-                        'job' => $person['WORK_POSITION'],
-                        'active' => $person['ACTIVE'],
-                    ];
+                foreach ($this->peopleMultiSelect as $key => $item) {
+                    if (isset($item['department_id'])) {
+                        if ($person['UF_DEPARTMENT'][0] == $item['department_id']) {
+                            $this->peopleMultiSelect[$key]['params'][] = [
+                                'id' => $person['ID'],
+                                'text' => trim($person['LAST_NAME'] . ' ' . $person['NAME'] . ' ' . $person['SECOND_NAME']),
+                                'img' => $person['PERSONAL_PHOTO'],
+                                'job' => $person['WORK_POSITION'],
+                                'active' => $person['ACTIVE'],
+                            ];
+                        }
+                    } else if ($item['department'] == 'Без отдела') {
+                        $this->peopleMultiSelect[$key]['params'][] = [
+                            'id' => $person['ID'],
+                            'text' => trim($person['LAST_NAME'] . ' ' . $person['NAME'] . ' ' . $person['SECOND_NAME']),
+                            'img' => $person['PERSONAL_PHOTO'],
+                            'job' => $person['WORK_POSITION'],
+                            'active' => $person['ACTIVE'],
+                        ];
+                    }
+                }
+                foreach ($this->activePeopleMultiSelect as $key => $item) {
+                    if($person['ACTIVE']) {
+                        if (isset($item['department_id'])) {
+                            if ($person['UF_DEPARTMENT'][0] == $item['department_id']) {
+                                $this->activePeopleMultiSelect[$key]['params'][] = [
+                                    'id' => $person['ID'],
+                                    'text' => trim($person['LAST_NAME'] . ' ' . $person['NAME'] . ' ' . $person['SECOND_NAME']),
+                                    'img' => $person['PERSONAL_PHOTO'],
+                                    'job' => $person['WORK_POSITION'],
+                                    'active' => $person['ACTIVE'],
+                                ];
+                            }
+                        } else if ($item['department'] == 'Без отдела') {
+                            $this->activePeopleMultiSelect[$key]['params'][]= [
+                                'id' => $person['ID'],
+                                'text' => trim($person['LAST_NAME'] . ' ' . $person['NAME'] . ' ' . $person['SECOND_NAME']),
+                                'img' => $person['PERSONAL_PHOTO'],
+                                'job' => $person['WORK_POSITION'],
+                                'active' => $person['ACTIVE'],
+                            ];
+                        }
+                    }
                 }
             }
-            \Cache::put("peopleMultiSelect", $this->peopleMultiSelect, Carbon::now()->addMinutes(360));
-            \Cache::put("activePeopleMultiSelect", $this->activePeopleMultiSelect, Carbon::now()->addMinutes(360));
+            \Cache::put("peopleMultiSelect", $this->peopleMultiSelect, Carbon::now()->addMinutes(30));
+            \Cache::put("activePeopleMultiSelect", $this->activePeopleMultiSelect, Carbon::now()->addMinutes(30));
         }
 
         return [
-            'peopleMultiSelect' => $this->peopleMultiSelect,
+			'peopleMultiSelect' => $this->peopleMultiSelect,
             'activePeopleMultiSelect' => $this->activePeopleMultiSelect,
             'leadStatusList' => $leadStatusList,
             'leadTypeList' => $leadTypeList,
@@ -198,7 +288,9 @@ class UserController extends Controller
             'regionsList' => $regionList,
             'citiesList' => $citiesList,
             'sourcesList' => $sourceList,
-            'salesDepartmentsList' => $salesDepartmentsList,
-        ];
+            'salesDepartmentsLeadList' => $salesDepartmentsLeadList,
+            'salesDepartmentsDealList' => $salesDepartmentsDealList,
+            'salesDepartmentsContactList' => $salesDepartmentsContactList,
+		];
     }
 }

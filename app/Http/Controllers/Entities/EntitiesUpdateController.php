@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Entities;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\CRest;
 use App\Jobs\ProcessUpdate;
+use Illuminate\Http\Request;
 use App\Models\History;
 use App\Models\TransferGroup;
 use Illuminate\Support\Facades\Log;
@@ -44,7 +45,7 @@ class EntitiesUpdateController extends Controller
         $counterActivity = 0;
         $counterTasks = 0;
 
-        if($filtered) {
+        if ($filtered) {
             $markedActivePeople = $toUsers;
             Log::build([
                 'driver' => 'single',
@@ -100,10 +101,11 @@ class EntitiesUpdateController extends Controller
                         $entitiesByEmployerId['leads'][$leadID]['activity'][$activityID] = $currentPerson;
                     }
                 }
+                if (!isset($lead['resp'])) continue;
                 History::firstOrCreate([
                     'entity_ID' => $leadID,
                     'entity_type' => 'lead',
-                    'old_responsible_ID' => $entitiesByEmployerId['leads'][$leadID]['resp'],
+                    'old_responsible_ID' => $lead['resp'],
                     'new_responsible_ID' => $currentPerson,
                     'transfer_group_ID' => $transferGroup->id,
                 ]);
@@ -144,6 +146,7 @@ class EntitiesUpdateController extends Controller
                         $entitiesByEmployerId['deals'][$dealID]['activity'][$activityID] = $currentPerson;
                     }
                 }
+                if (!isset($deal['resp'])) continue;
                 History::firstOrCreate([
                     'entity_ID' => $dealID,
                     'entity_type' => 'deal',
@@ -188,6 +191,7 @@ class EntitiesUpdateController extends Controller
                         $entitiesByEmployerId['contacts'][$contactID]['activity'][$activityID] = $currentPerson;
                     }
                 }
+                if (!isset($contact['resp'])) continue;
                 History::firstOrCreate([
                     'entity_ID' => $contactID,
                     'entity_type' => 'contact',
@@ -205,8 +209,9 @@ class EntitiesUpdateController extends Controller
         $countersToUpdateMessage['counterActivity'] = $counterActivity;
 
         $this->generateTransferMessage($counterLeads, $counterDeals, $counterContacts, $counterTasks, $counterActivity, $transferGroup);
-        $this->generateBitrixUpdateRequest($entitiesByEmployerId, $counterEntities, $transferGroup, $countersToUpdateMessage,  $newSource, $newSalesDepartment);
+        $this->generateBitrixUpdateRequest($entitiesByEmployerId, $counterEntities, $transferGroup, $countersToUpdateMessage, $newSource, $newSalesDepartment);
     }
+
 //---------------------------------------------Make-update-params-----------------------------------------------------//
     private function respFieldType($changeableEntity): string
     {
@@ -228,7 +233,7 @@ class EntitiesUpdateController extends Controller
         return 'crm.' . $changeableEntity['entity_type'] . '.update';
     }
 
-    private function generateUpdateParams($historyObject, $id, $fields,  $newSource, $newSalesDepartment): array
+    private function generateUpdateParams($historyObject, $id, $fields, $newSource, $newSalesDepartment): array
     {
         $respFieldType = $this->respFieldType($historyObject);
         $updateParams['method'] = $this->updateMethod($historyObject);
@@ -258,7 +263,9 @@ class EntitiesUpdateController extends Controller
                 if (!empty($values['tasks'])) {
                     foreach ($values['tasks'] as $taskID => $task) {
                         $historyTaskID = $this->getIdFromDatabase($taskID, $transferGroup);
-                        $updateParams[$historyTaskID['id']] = $this->generateUpdateParams($historyTaskID, $taskID, $values['resp'],  $newSource, $newSalesDepartment);
+                        if(isset($values['resp'])) {
+                            $updateParams[$historyTaskID['id']] = $this->generateUpdateParams($historyTaskID, $taskID, $values['resp'], $newSource, $newSalesDepartment);
+                        }
                         if (++$counter == 50) {
                             $this->storeBitrix($updateParams, $transferGroup, $countersToUpdateMessage, $callWay);
                             $this->counterIter++;
@@ -270,7 +277,9 @@ class EntitiesUpdateController extends Controller
                 if (!empty($values['activity'])) {
                     foreach ($values['activity'] as $activityID => $activity) {
                         $historyActivityID = $this->getIdFromDatabase($activityID, $transferGroup);
-                        $updateParams[$historyActivityID['id']] = $this->generateUpdateParams($historyActivityID, $activityID, $values['resp'],  $newSource, $newSalesDepartment);
+                        if(isset($values['resp'])) {
+                            $updateParams[$historyActivityID['id']] = $this->generateUpdateParams($historyActivityID, $activityID, $values['resp'], $newSource, $newSalesDepartment);
+                        }
                         if (++$counter == 50) {
                             $this->storeBitrix($updateParams, $transferGroup, $countersToUpdateMessage, $callWay);
                             $this->counterIter++;
@@ -280,7 +289,9 @@ class EntitiesUpdateController extends Controller
                     }
                 }
                 $historyEntityID = $this->getIdFromDatabase($entityID, $transferGroup);
-                $updateParams[$historyEntityID['id']] = $this->generateUpdateParams($historyEntityID, $entityID, $values['resp'],  $newSource, $newSalesDepartment);
+                if(isset($values['resp'])) {
+                $updateParams[$historyEntityID['id']] = $this->generateUpdateParams($historyEntityID, $entityID, $values['resp'], $newSource, $newSalesDepartment);
+                }
                 if (++$counter == 50) {
                     $this->storeBitrix($updateParams, $transferGroup, $countersToUpdateMessage, $callWay);;
                     $this->counterIter++;
@@ -297,11 +308,10 @@ class EntitiesUpdateController extends Controller
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-    public function storeBitrix($updateParams, $transferGroup, $countersToUpdateMessage, $callWay)
+    public function storeBitrix($updateParams, $transferGroup, $countersToUpdateMessage, $callWay = [])
     {
         $errorIDs = [];
         $successIDs = [];
-
 
         $updateResponse = CRest::callBatch($updateParams);
         if (isset($updateResponse) && !empty($updateResponse['result'])) {
@@ -349,8 +359,7 @@ class EntitiesUpdateController extends Controller
 //----------------------------------------------Отправка-сообщений----------------------------------------------------//
     public function generateEmployersStringToMessages($transferGroup): array
     {
-
-        $entities = History::where('transfer_group_ID', $transferGroup['id'])->get();
+            $entities = History::where('transfer_group_ID', $transferGroup['id'])->get();
 
         $departments = CRest::firstBatch('department.get');
 
@@ -470,8 +479,6 @@ class EntitiesUpdateController extends Controller
     Звонки\Встречи: {$buffer} \r
     CRM-задачи: {$buffer} \r
 
-Дополнительная информация:
-
 ",
         ]);
         $messageID = $sendMessage['result'];
@@ -527,11 +534,10 @@ class EntitiesUpdateController extends Controller
     Звонки\Встречи: {$transferredActivities} \r
     CRM-задачи: {$transferredTasks} \r
 
-Дополнительная информация: 
-
 ",
         ]);
     }
+
 //-----------------------------------------------------Retry----------------------------------------------------------//
     public function checkBDforErrors()
     {
@@ -606,51 +612,6 @@ class EntitiesUpdateController extends Controller
                 $this->storeBitrix($retryUpdateParams, $transferGroup, $countersToUpdateMessage, $callWay);
             }
         }
-    }
-//---------------------------------------------Send-message-test------------------------------------------------------//
-    public function generateTransferMessageTest()
-    {
-        $counterLeads = 0;
-        $counterDeals = 0;
-        $counterContacts = 0;
-        $counterTasks = 0;
-        $counterActivity = 0;
-        $transferGroup = [
-            'id' => '1',
-        ];
-
-        $buffer = 0;
-        $employersString = $this->generateEmployersStringToMessages($transferGroup);
-        $messageTransferGroup = $transferGroup['id'];
-        $sendMessage = CRest::call('im.message.add', [
-            'DIALOG_ID' => 'chat534425', // test chat534425 main chat568134
-            'MESSAGE' => "
-Запущена передача №{$messageTransferGroup}: \r
-
-С кого: 
-{$employersString[0]}
-На кого: 
-{$employersString[1]}
-Сущности:
-Всего: \r
-    Лиды: {$counterLeads} \r
-    Сделки: {$counterDeals} \r
-    Контакты: {$counterContacts} \r
-    Звонки\Встречи: {$counterActivity} \r
-    CRM-задачи: {$counterTasks} \r
-Успешно передано:
-    Лиды: {$buffer} \r
-    Сделки: {$buffer} \r
-    Контакты: {$buffer} \r
-    Звонки\Встречи: {$buffer} \r
-    CRM-задачи: {$buffer} \r
-
-Дополнительная информация:
-
-",
-        ]);
-        $messageID = $sendMessage['result'];
-        TransferGroup::where('id', $transferGroup['id'])->update(['message_id' => $messageID]);
     }
 }
 

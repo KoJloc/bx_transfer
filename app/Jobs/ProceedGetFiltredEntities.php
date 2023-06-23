@@ -21,14 +21,9 @@ class ProceedGetFiltredEntities implements ShouldQueue, ShouldBeUnique
 
     protected $response, $params, $fromUsers, $toUsers;
 
-    public $tries = 1;
-
+    public $tries = 3;
+    public $backoff = 15;
     public $uniqueFor = 3600;
-
-    public function middleware()
-    {
-        return [new WithoutOverlapping($this->response->id)];
-    }
 
     public function uniqueId(): string
     {
@@ -80,6 +75,49 @@ class ProceedGetFiltredEntities implements ShouldQueue, ShouldBeUnique
         return date("Y-m-d", strtotime($data)) . "T00:00:00+05:00";
     }
 
+    private function SplitEntitiesByProportion($entities, $type, $counter = 0)
+    {
+        $trueCounter = round($this->params['count'] / count($this->fromUsers));
+        foreach ($this->fromUsers as $userKey => $user) {
+            $bufferCounter = 0;
+            foreach ($entities as $entityKey => $entity) {
+                if ($counter == $this->params['count']) break;
+                if ($bufferCounter < $trueCounter) {
+                    if (isset($entity['resp']) && $entity['resp'] == $user) {
+                        $this->entitiesByEmployerId[$type][$entityKey] = $entity;
+                        unset($entities[$entityKey]);
+                        $bufferCounter++;
+                        $counter++;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        if (count($this->entitiesByEmployerId[$type]) < $this->params['count']) $this->SplitEntitiesByProportion($entities, $type, $counter);
+    }
+
+    private function SplitEntitiesByProportionSolo($entities, $type, $counter = 0)
+    {
+        foreach ($this->fromUsers as $userKey => $user) {
+            $bufferCounter = 0;
+            foreach ($entities as $entityKey => $entity) {
+                if ($counter == $this->params['count']) break;
+                if ($bufferCounter < $this->params['count']) {
+                    if (isset($entity['resp']) && $entity['resp'] == $user) {
+                        $this->entitiesByEmployerId[$type][$entityKey] = $entity;
+                        unset($entities[$entityKey]);
+                        $bufferCounter++;
+                        $counter++;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+
+    }
+
     public function handle()
     {
         set_time_limit(0);
@@ -95,16 +133,19 @@ class ProceedGetFiltredEntities implements ShouldQueue, ShouldBeUnique
 
         if (!isset($this->params['checkedType'])) return 'error';
 
+
         if (in_array($this->params['checkedType'], ['lead', 'all'])) {
             $leadsFilters = [
                 'ASSIGNED_BY_ID' => $this->fromUsers, //Отвественный за лид
                 array_key_exists('leadStatus', $this->params) ? 'STATUS_ID' : '!STATUS_ID' => array_key_exists('leadStatus', $this->params) ? $this->SortArrayToStatus($this->params['leadStatus']) : 'CONVERTED', //Статус лида
                 'UF_CRM_1662639727' => array_key_exists('leadType', $this->params) ? $this->SortArrayToIDs($this->params['leadType']) : [], //Тип лида
                 'UF_CRM_1622543817615' => array_key_exists('city', $this->params) ? $this->SortArrayToIDs($this->params['city']) : [], //Город
-                'SOURCE_DESCRIPTION' => array_key_exists('aboutSource', $this->params) ? $this->SortArrayToIDs($this->params['aboutSource']) : [], //Дополнительно об источнике
+                'UF_CRM_1660713522' => $this->params['hotLeadList'] != 'null' ? $this->params['hotLeadList'] == '1' : [],
+                '%SOURCE_DESCRIPTION' => array_key_exists('aboutSource', $this->params) ? $this->SortArrayToIDs($this->params['aboutSource']) : [], //Дополнительно об источнике
                 'UF_CRM_1626242852' => array_key_exists('regions', $this->params) ? $this->SortArrayToIDs($this->params['regions']) : [], //Регион
                 'SOURCE_ID' => array_key_exists('sources', $this->params) ? $this->SortArrayToIDs($this->params['sources']) : [], //Отдел продаж
-                'UF_CRM_1561882407' => array_key_exists('salesDepartments', $this->params) ? $this->SortArrayToIDs($this->params['salesDepartments']) : [], //Источник
+                'UF_CRM_1561882407' => array_key_exists('salesDepartmentsLead', $this->params) ? $this->SortArrayToIDs($this->params['salesDepartmentsLead'])
+                    : (array_key_exists('salesDepartments', $this->params) ? $this->SortArrayToIDs($this->params['salesDepartments']) : []), //Источник
                 '>=DATE_CREATE' => array_key_exists('fromDate', $this->params) ? $this->ConvertDataTimeFormat($this->params['fromDate']) : [], //Начальная дата
                 '<=DATE_CREATE' => array_key_exists('toDate', $this->params) ? $this->ConvertDataTimeFormat($this->params['toDate']) : [], //Конечная дата
             ];
@@ -123,15 +164,16 @@ class ProceedGetFiltredEntities implements ShouldQueue, ShouldBeUnique
                 'ASSIGNED_BY_ID' => $this->fromUsers, //Ответственный за сделку
                 '!STAGE_ID' => ['C6:NEW', 'C6:WON'],
                 'TYPE_ID' => array_key_exists('dealType', $this->params) ? $this->SortArrayToStatus($this->params['dealType']) : [], //Тип сделки
-                'CATEGORY_ID' => array_key_exists('dealFunnel', $this->params) ? $this->SortArrayToIDs($this->params['dealFunnel']) : [], //Воронка сделки
+                'CATEGORY_ID' => array_key_exists('dealFunnel', $this->params) ? $this->SortArrayToIDs($this->params['dealFunnel']) : [], //Направления сделки
                 'UF_CRM_1626242852' => array_key_exists('regions', $this->params) ? $this->SortArrayToIDs($this->params['regions']) : [], //Регион
-                'SOURCE_ID' => array_key_exists('sources', $this->params) ? $this->SortArrayToIDs($this->params['sources']) : [], //Отдел продаж
-                'UF_CRM_1561882407' => array_key_exists('salesDepartments', $this->params) ? $this->SortArrayToIDs($this->params['salesDepartments']) : [], //Источник
+                'SOURCE_ID' => array_key_exists('sources', $this->params) ? $this->SortArrayToIDs($this->params['sources']) : [], //Источник
+                'UF_CRM_1561882407' => array_key_exists('salesDepartmentsDeal', $this->params) ? $this->SortArrayToIDs($this->params['salesDepartmentsDeal'])
+                    : (array_key_exists('salesDepartments', $this->params) ? $this->SortArrayToIDs($this->params['salesDepartments']) : []), //Отдел продаж
                 '>=DATE_CREATE' => array_key_exists('fromDate', $this->params) ? $this->ConvertDataTimeFormat($this->params['fromDate']) : [], //Начальная дата
                 '<=DATE_CREATE' => array_key_exists('toDate', $this->params) ? $this->ConvertDataTimeFormat($this->params['toDate']) : [], //Конечная дата
             ];
 
-            $deals = CRest::call('crm.deal.list', [
+            $deals = CRest::firstBatch('crm.deal.list', [
                 'filter' => $dealsFilter,
                 'select' => [
                     'ID',
@@ -143,8 +185,9 @@ class ProceedGetFiltredEntities implements ShouldQueue, ShouldBeUnique
         if (in_array($this->params['checkedType'], ['contact', 'all'])) {
             $contactsFilters = [
                 'ASSIGNED_BY_ID' => $this->fromUsers, //Отвественный за контакт
-                'SOURCE_ID' => array_key_exists('sources', $this->params) ? $this->SortArrayToIDs($this->params['sources']) : [], //Отдел продаж
-                'UF_CRM_1561882407' => array_key_exists('salesDepartments', $this->params) ? $this->SortArrayToIDs($this->params['salesDepartments']) : [], //Источник
+                'SOURCE_ID' => array_key_exists('sources', $this->params) ? $this->SortArrayToIDs($this->params['sources']) : [], //Источник
+                'UF_CRM_5D19073319DA8' => array_key_exists('salesDepartmentsContact', $this->params) ? $this->SortArrayToIDs($this->params['salesDepartmentsContact'])
+                    : (array_key_exists('salesDepartments', $this->params) ? $this->SortArrayToIDs($this->params['salesDepartments']) : []), //Отдел продаж
                 '>=DATE_CREATE' => array_key_exists('fromDate', $this->params) ? $this->ConvertDataTimeFormat($this->params['fromDate']) : [], //Начальная дата
                 '<=DATE_CREATE' => array_key_exists('toDate', $this->params) ? $this->ConvertDataTimeFormat($this->params['toDate']) : [], //Конечная дата
             ];
@@ -157,51 +200,76 @@ class ProceedGetFiltredEntities implements ShouldQueue, ShouldBeUnique
                 ],
             ]);
         }
+
 //--------------------------------------Обрабатываем_сущности---------------------------------------------------------//
-        if (isset($leads)) {
+        $this->leadActivityOwnersId = [];
+        $this->otherActivityOwnersId = [];
+
+        if (isset($leads) && !empty($leads)) {
             foreach ($leads as $lead) {
-                $this->entitiesByEmployerId['leads'][$lead['ID']]['resp'] = $lead['ASSIGNED_BY_ID'];
-                $this->taskFilter['UF_CRM_TASK'][] = 'L_' . $lead['ID'];
-                $this->activityOwnersId[] = $lead['ID'];
+                if (!empty($lead['ID']) && !empty($lead['ASSIGNED_BY_ID'])) {
+                    $this->entitiesByEmployerId['leads'][$lead['ID']]['resp'] = $lead['ASSIGNED_BY_ID'];
+                    $this->taskFilter['UF_CRM_TASK'][] = 'L_' . $lead['ID'];
+                    $this->leadActivityOwnersId[] = $lead['ID'];
+                } else {
+                    info('bad lead', $lead);
+                }
             }
         }
 
-        if (isset($deals)) {
+        if (isset($deals) && !empty($deals)) {
             foreach ($deals as $deal) {
-                $this->entitiesByEmployerId['deals'][$deal['ID']]['resp'] = $deal['ASSIGNED_BY_ID'];
-                $this->taskFilter['UF_CRM_TASK'][] = 'D_' . $deal['ID'];
-                $this->activityOwnersId[] = $deal['ID'];
+                if (!empty($deal['ID']) && !empty($deal['ASSIGNED_BY_ID'])) {
+                    $this->entitiesByEmployerId['deals'][$deal['ID']]['resp'] = $deal['ASSIGNED_BY_ID'];
+                    $this->taskFilter['UF_CRM_TASK'][] = 'D_' . $deal['ID'];
+                    $this->otherActivityOwnersId[] = $deal['ID'];
+                } else {
+                    info('bad deal', $deal);
+                }
             }
         }
 
-        if (isset($contacts)) {
+        if (isset($contacts) && !empty($contacts)) {
             foreach ($contacts as $contact) {
-                $this->entitiesByEmployerId['contacts'][$contact['ID']]['resp'] = $contact['ASSIGNED_BY_ID'];
-                $this->taskFilter['UF_CRM_TASK'][] = 'C_' . $contact['ID'];
-                $this->activityOwnersId[] = $contact['ID'];
+                if (!empty($contact['ID']) && !empty($contact['ASSIGNED_BY_ID'])) {
+                    $this->entitiesByEmployerId['contacts'][$contact['ID']]['resp'] = $contact['ASSIGNED_BY_ID'];
+                    $this->taskFilter['UF_CRM_TASK'][] = 'C_' . $contact['ID'];
+                    $this->otherActivityOwnersId[] = $contact['ID'];
+                } else {
+                    info('bad contact', $contact);
+                }
             }
         }
-//--------------------------------------------------------Таски-------------------------------------------------------//
         if ((empty($leads) && empty($deals) && empty($contacts))) return 'error';
+//-----------------------------------Выбираем-количество-по-общему-числу-с-кого---------------------------------------//
 
+        if (array_key_exists('count', $this->params)) {
+            $entities = ($this->params['checkedType'] == 'contact'
+                ? $this->entitiesByEmployerId['contacts'] : ($this->params['checkedType'] == 'deal'
+                    ? $this->entitiesByEmployerId['deals'] : $this->entitiesByEmployerId['leads']));
+            $type = $this->params['checkedType'] == 'lead' ? 'leads' : ($this->params['checkedType'] == 'deal' ? 'deals' : 'contacts');
+            $this->entitiesByEmployerId = [];;
+            if (count($this->fromUsers) != 1 && !($this->params['count'] > count($entities))) {
+                $this->SplitEntitiesByProportion($entities, $type);
+            } else {
+                $this->SplitEntitiesByProportionSolo($entities, $type);
+            }
+        };
+
+//--------------------------------------------------------Таски-------------------------------------------------------//
         $tasks = [];
         $regular = '/[0-9]+/';
-        $taskFilterChunks = array_chunk($this->taskFilter['UF_CRM_TASK'], 1000);
+        $taskFilterChunks = array_chunk($this->taskFilter['UF_CRM_TASK'], 500);
         unset($this->taskFilter);
 
         foreach ($taskFilterChunks as $chunk) {
             $currentFilter['UF_CRM_TASK'] = $chunk;
             $tasksFromBitrix = CRest::firstBatch('tasks.task.list', [
-                'filter' => [
-                    $currentFilter,
-                    'REAL_STATUS' => [1, 2, 3, 4, 6, 7]
-                ],
-                'select' => [
-                    'ID',
+                'filter' => [$currentFilter,
+                    'REAL_STATUS' => [1, 2, 3, 4, 6, 7]],
+                'select' => ['ID',
                     'RESPONSIBLE_ID',
-                    'UF_CRM_TASK',
-                ]
-            ]);
+                    'UF_CRM_TASK',]]);
             if (!isset($tasksFromBitrix['tasks'])) {
                 foreach ($tasksFromBitrix as $item) {
                     $tasks[] = $item;
@@ -220,30 +288,59 @@ class ProceedGetFiltredEntities implements ShouldQueue, ShouldBeUnique
                     } elseif (str_contains($ufCrmTask, 'C')) {
                         $typeName = 'contacts';
                     }
-                    $this->entitiesByEmployerId[$typeName][$this->clearedTaskFilter]['tasks'][$task['id']] = $task['responsibleId'];
+                    if (array_key_exists($this->clearedTaskFilter, $this->entitiesByEmployerId[$typeName])) {
+                        $this->entitiesByEmployerId[$typeName][$this->clearedTaskFilter]['tasks'][$task['id']] = $task['responsibleId'];
+                    }
                 }
             }
         }
 //----------------------------------------------------Активити--------------------------------------------------------//
         $activities = [];
-        $activityOwnersIdChunks = array_chunk($this->activityOwnersId, 1000);
-        unset($this->activityOwnersId);
+        if(count($this->leadActivityOwnersId) > 0) {
+            $leadActivityOwnersIdChunks = array_chunk($this->leadActivityOwnersId, 500);
+        }
+        if(count($this->otherActivityOwnersId) > 0) {
+            $otherActivityOwnersIdChunks = array_chunk($this->otherActivityOwnersId, 500);
+        }
+        unset($this->leadActivityOwnersId, $this->otherActivityOwnersId);
 
-        foreach ($activityOwnersIdChunks as $chunk) {
-            $activityFilter = [
-                'OWNER_ID' => $chunk,
-                'COMPLETED' => 'N',
-                'PROVIDER_ID' => ['VOXIMPLANT_CALL', 'CRM_MEETING'], //'VOXIMPLANT_CALL' 'CRM_MEETING' 'TASKS'
-                'RESPONSIBLE_ID' => $this->fromUsers,
-            ];
+        if(isset($leadActivityOwnersIdChunks)) {
+            foreach ($leadActivityOwnersIdChunks as $chunk) {
+                $activityFilter = [
+                    'OWNER_ID' => $chunk,
+                    'COMPLETED' => 'N',
+                    'PROVIDER_ID' => ['VOXIMPLANT_CALL', 'CRM_MEETING'], //'VOXIMPLANT_CALL' 'CRM_MEETING' 'TASKS'
+                ];
 
-            $activitiesFromBitrix = CRest::firstBatch('crm.activity.list', [
-                'FILTER' => $activityFilter,
-            ]);
+                $activitiesFromBitrix = CRest::firstBatch('crm.activity.list', [
+                    'FILTER' => $activityFilter,
+                ]);
 
-            if (!empty($activitiesFromBitrix)) {
-                foreach ($activitiesFromBitrix as $item) {
-                    $activities[] = $item;
+                if (!empty($activitiesFromBitrix)) {
+                    foreach ($activitiesFromBitrix as $item) {
+                        $activities[] = $item;
+                    }
+                }
+            }
+        }
+
+        if(isset($otherActivityOwnersIdChunks)) {
+            foreach ($otherActivityOwnersIdChunks as $chunk) {
+                $activityFilter = [
+                    'OWNER_ID' => $chunk,
+                    'COMPLETED' => 'N',
+                    'PROVIDER_ID' => ['VOXIMPLANT_CALL', 'CRM_MEETING'], //'VOXIMPLANT_CALL' 'CRM_MEETING' 'TASKS'
+                    'RESPONSIBLE_ID' => $this->fromUsers,
+                ];
+
+                $activitiesFromBitrix = CRest::firstBatch('crm.activity.list', [
+                    'FILTER' => $activityFilter,
+                ]);
+
+                if (!empty($activitiesFromBitrix)) {
+                    foreach ($activitiesFromBitrix as $item) {
+                        $activities[] = $item;
+                    }
                 }
             }
         }
@@ -253,12 +350,13 @@ class ProceedGetFiltredEntities implements ShouldQueue, ShouldBeUnique
             if ($activity['OWNER_TYPE_ID'] == 1) {
                 $ternar = 'leads';
             }
-            $this->entitiesByEmployerId[$ternar][$activity['OWNER_ID']]['activity'][$activity['ID']] = $activity['RESPONSIBLE_ID'];
+            if (isset($this->entitiesByEmployerId[$ternar]) && array_key_exists($activity['OWNER_ID'], $this->entitiesByEmployerId[$ternar])) {
+                $this->entitiesByEmployerId[$ternar][$activity['OWNER_ID']]['activity'][$activity['ID']] = $activity['RESPONSIBLE_ID'];
+            }
         }
 
         $entitiesUpdateController->update($this->entitiesByEmployerId, $this->toUsers, array_key_exists('newSource', $this->params) ? $this->params['newSource']['id'] : [],
-                                                                                            array_key_exists('newSalesDepartment', $this->params) ? $this->params['newSalesDepartment']['id'] : [], $filtred = true);
+            array_key_exists('newSalesDepartment', $this->params) ? $this->params['newSalesDepartment']['id'] : [], $filtred = true);
         return 'completed';
     }
-
 }

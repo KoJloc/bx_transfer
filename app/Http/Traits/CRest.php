@@ -25,12 +25,12 @@ use Illuminate\Validation\ValidationException;
 
 trait CRest
 {
-    static $VERSION = 'stepan transfer-test';
+    static $VERSION = 'stepan transfer';
     static $BATCH_COUNT    = 50;//count batch 1 query
     static $TYPE_TRANSPORT = 'json';// json or xml
 
     // static $C_REST_CURRENT_ENCODING = 'unicode'; //set current encoding site if encoding unequal UTF-8 to use iconv()
-    static $C_REST_BLOCK_LOG = false; //turn off default logs
+    static $C_REST_BLOCK_LOG = true; //turn off default logs
 //    static $C_REST_LOGS_DIR = __DIR__ .'/logs/'; //directory path to save the log
     static $C_REST_LOG_TYPE_DUMP = true; //logs save var_export for viewing convenience
     static $C_REST_IGNORE_SSL = false; //turn off validate ssl by curl
@@ -315,7 +315,10 @@ trait CRest
                         }
                     }
                 } else {
-                    info('callBatch (!empty($data[method]) error: ', [$data]);
+                    Log::build([
+                        'driver' => 'single',
+                        'path' => storage_path('logs/CRest.log')
+                    ])->info('callBatch (!empty($data[method]) error: ', [$data]);
                 }
             }
             if(!empty($arDataRest))
@@ -327,7 +330,10 @@ trait CRest
                 ];
                 $arResult = static::callCurl($arPost);
             } else {
-                info('callBatch (!empty($arDataRest) error: ', [$arDataRest]);
+                Log::build([
+                    'driver' => 'single',
+                    'path' => storage_path('logs/CRest.log')
+                ])->info('callBatch (!empty($arDataRest) error: ', [$arDataRest]);
             }
         }
         return $arResult;
@@ -342,7 +348,10 @@ trait CRest
         $review_request_first = static::call($method, $params);
 
         if (array_key_exists('total', $review_request_first) and $review_request_first['total'] >= 50) {
-            if ($show && $method != 'department.get') info($method . " Всего: " . $review_request_first['total']);
+            if ($show && $method != 'department.get') Log::build([
+                        'driver' => 'single',
+                        'path' => storage_path('logs/CRest.log')
+                    ])->info($method . " Всего: " . $review_request_first['total']);
 
             if ($review_request_first['total'] > 2500) {
                 for ($mass = 0; $mass < ceil($review_request_first['total'] / 2500); $mass++) {
@@ -357,7 +366,10 @@ trait CRest
                         $start += 50;
                     }
 
-                    if ($show) info($start);
+                    if ($show) Log::build([
+                        'driver' => 'single',
+                        'path' => storage_path('logs/CRest.log')
+                    ])->info($start);
 
                     $review_request = static::callBatch($arParams);
 
@@ -379,13 +391,21 @@ trait CRest
                                         $return_data[$stat['ANCHOR_ID'] . '_' . $stat['TYPE_ID'] . '_' . $stat['ENTITY_TYPE_ID'] . '_' . $stat['ENTITY_TYPE_ID']] = $stat;
                                     } else {
                                         //Вывод в логи если отсутствует ID или ANCHOR ID
-                                        info('$review_request error', [$stat]);
+                                    Log::build([
+                        'driver' => 'single',
+                        'path' => storage_path('logs/CRest.log')
+                    ])->info('$review_request error', [$stat]);
                                     };
                                 }
                             }
                         }
                     } else {
-                        info($review_request);
+                        if($method != 'department.get') {
+                            Log::build([
+                                'driver' => 'single',
+                                'path' => storage_path('logs/CRest.log')
+                            ])->info($review_request);
+                        }
                     }
                 }
             } else {
@@ -398,7 +418,10 @@ trait CRest
                     $start += 50;
                 }
 
-                if ($show) info($start);
+                if ($show && $method != 'department.get' ) Log::build([
+                        'driver' => 'single',
+                        'path' => storage_path('logs/CRest.log')
+                    ])->info($start);
 
                 $review_request = static::callBatch($arParams);
 
@@ -423,11 +446,19 @@ trait CRest
                         }
                     }
                 } else {
-                    info($review_request);
-                };
+                    if ($method != 'department.get') {
+                        Log::build([
+                            'driver' => 'single',
+                            'path' => storage_path('logs/CRest.log')
+                        ])->info($review_request);
+                    };
+                }
             };
         } else {
-            if ($show && $method != 'department.get') info("Всего: " . count($review_request_first['result']));
+            if ($show && $method != 'department.get') Log::build([
+                        'driver' => 'single',
+                        'path' => storage_path('logs/CRest.log')
+                    ])->info("Всего: " . count($review_request_first['result']));
 
             if ($method == 'tasks.task.list') {
                 if (!empty ($review_request_first['result']['tasks'])) {

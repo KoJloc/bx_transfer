@@ -1,19 +1,20 @@
 <?php
 
+use App\Http\Controllers\Entities\ApiUserController;
+use App\Http\Controllers\Entities\UserController;
 use App\Http\Controllers\Entities\EntitiesGetController;
 use App\Http\Controllers\Entities\EntitiesUpdateController;
 use App\Http\Controllers\Entities\EntitiesRollbackController;
-use App\Http\Controllers\Entities\UserController;
-use App\Http\Controllers\InstallController;
-use App\Http\Controllers\IndexController;
 use App\Http\Controllers\History\HistoryController;
 use App\Http\Controllers\History\ShowController;
+use App\Http\Controllers\InstallController;
+use App\Http\Controllers\IndexController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\VerifiedUserController;
 use App\Models\User;
-use Cassandra\Exception\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Entities\ApiUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,9 +49,6 @@ Route::middleware('auth:sanctum')->post('/user', function (Request $request) {
 
 Route::post('/index', [IndexController::class, '__invoke']);
 
-Route::post('/histories/history', [HistoryController::class, 'index']);
-Route::post('/histories/history/show', [ShowController::class, 'index']);
-
 // API с приложения Никитоса
 Route::post('/transfer/install', [InstallController::class, 'install']);
 Route::post('/transfer/user', [ApiUserController::class, 'get']);
@@ -63,5 +61,24 @@ Route::group(['namespace' => 'Entities', 'prefix' => 'entities'], function () {
     Route::post('/', [UserController::class, '__invoke']);
     Route::post('/params/set', [EntitiesGetController::class, 'vueRequestProcess']);
 });
+
+Route::post('/histories/history', [HistoryController::class, 'index']);
+Route::post('/histories/history/show', [ShowController::class, 'index']);
+
+Route::post('/users/get', [VerifiedUserController::class, 'index']);
+Route::post('/users/store', [VerifiedUserController::class, 'store']);
+Route::post('/users/verify', [VerifiedUserController::class, 'update']);
+
+Route::post('/dashboard/dates', [DashboardController::class, 'dates']);
+Route::post('/dashboard/types', [DashboardController::class, 'types']);
+Route::post('/dashboard/counts', [DashboardController::class, 'transfer_count']);
+
+
+
+Route::post('/emp_string_test', [EntitiesUpdateController::class, 'generateEmployersStringToMessagesTest']);
+
+
+
+
 
 

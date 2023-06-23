@@ -22,6 +22,8 @@ class EntitiesGetController extends Controller
 
         $data = $request->all();
 
+        info($data);
+
         if(empty($data['departments']) || empty($data['onlyActiveDepartments'])) return 'error';
 
         foreach ($data['departments'] as $employee) {
@@ -34,13 +36,11 @@ class EntitiesGetController extends Controller
             'from_id' => json_encode($fromUsers),
             'to_id' => json_encode($toUsers),
         ]);
-
         foreach ($data as $key => $value) {
             if (!empty($value)) {
                 $params[$key] = $value;
             }
         }
-
         ProceedGetFiltredEntities::dispatch($response, $params, $fromUsers, $toUsers);
     }
 
@@ -67,6 +67,6 @@ class EntitiesGetController extends Controller
         } else {
             return 'Ошибка: не с кого передавать';
         }
-        ProceedGetEntities::dispatch($response, $fromUsers, $toUsers);
+        return ProceedGetEntities::dispatch($response, $fromUsers, $toUsers);
     }
 }

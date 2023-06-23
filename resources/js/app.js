@@ -2,12 +2,14 @@ import Vue from 'vue'
 import store from './store'
 import router from "./router";
 import Index from "./components/Index";
-import Select2MultipleControl from 'v-select2-multiple-component';
 import Multiselect from 'vue-multiselect';
 import DatePicker from 'vue2-datepicker';
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 Vue.config.productionTip = false
 Vue.component('multiselect', Multiselect)
+Vue.use(Toast)
 require('./bootstrap');
 
 const app = new Vue({
@@ -15,9 +17,9 @@ const app = new Vue({
 
     components:{
         Index,
-        Select2MultipleControl,
         Multiselect,
-        DatePicker
+        DatePicker,
+        Toast,
     },
     router,
     store

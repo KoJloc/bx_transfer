@@ -27,7 +27,12 @@ class Kernel extends ConsoleKernel
     {
          $schedule->call('App\Http\Controllers\Entities\EntitiesUpdateController@checkBDforErrors')
              ->name('transfer')
-             ->everyFifteenMinutes();
+//             ->everyFifteenMinutes();
+             ->everyTwoMinutes();
+
+        $schedule->call('App\Http\Controllers\VerifiedUserController@store')
+            ->name('transfer.users')
+            ->everyThreeHours();
     }
 
     /**

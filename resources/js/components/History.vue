@@ -3,25 +3,25 @@
     <div class="container">
       <form>
         <div class="row mb-2">
-          <label for="inputEmail3" class="col-sm-2 col-form-label">Поиск по ID передачи</label>
+          <p for="SearchInput" class="col-sm-2 col-form-label">Поиск по ID передачи</p>
           <div class="col-sm-6">
             <input v-model.trim="SearchData" id="SearchInput" type="search" class="form-control"
-                   placeholder="Введите ID передачи">
+                   placeholder="Введите ID передачи" @keyup.enter="Search()">
           </div>
         </div>
         <div class="row mb-3">
-          <label for="inputEmail3" class="col-sm-2 col-form-label">Поиск по дате создания </label>
+          <p for="DateInput" class="col-sm-2 col-form-label">Поиск по дате создания </p>
           <div class="col-sm-6">
-            <date-picker class="custom-datepicker" v-model.trim="SearchDate" type="datetime" range valueType="format"></date-picker>
+            <date-picker id="DateInput" class="custom-datepicker" v-model.trim="SearchDate" type="datetime" range valueType="format"></date-picker>
           </div>
           <div class="col-sm-3">
             <button class="btn btn-outline-success" type="button" @click="Search()">Поиск</button>
-            <button class="btn btn-outline-warning" type="button" @click="SetFilterDefaults()">Сброс</button>
+            <button class="btn btn-outline-danger" type="button" @click="SetFilterDefaults()">Сброс</button>
           </div>
         </div>
       </form>
       <div class="row p-3">
-        <table class="table">
+        <table class="table table-hover">
           <thead>
           <tr>
             <th scope="col" class="px-6 py-3">ID</th>
@@ -34,13 +34,13 @@
           </thead>
           <tbody>
           <tr v-for="history in Data">
-            <td><router-link :to="{name: 'history.show', params: {id: history.id }}">{{ history.id }}</router-link></td>
-            <td>{{ history.transfer_group_status }}</td>
-            <td>{{ history.rollback_status }}</td>
+            <td><router-link :to="{name: 'history.show', params: {id: history.id, page: Page }}">{{ history.id }}</router-link></td>
+            <td>{{ history.transfer_group_status === 1 ? 'Успешно' : 'Не успешно' }}</td>
+            <td>{{ history.rollback_status === 1 ? 'Выполнено' : 'Не запускался' }}</td>
             <td>{{ history.created_at }}</td>
             <td>{{ history.updated_at }}</td>
             <td>
-              <button @click="Rollback(history.id)" type="button" class="btn btn-outline-danger btn-sm">Откатить
+              <button @click="Rollback(history.id)" type="button" class="btn btn-outline-warning btn-sm">Откатить
               </button>
             </td>
           </tr>
@@ -48,7 +48,7 @@
         </table>
       </div>
       <!-- pagination -->
-      <div class="row">
+      <div class="row" v-if="!(Pagination.total <= Pagination.per_page)">
         <nav aria-label="Навигация">
           <ul class="pagination">
             <li class="page-item">
@@ -105,7 +105,11 @@ export default {
     }
   },
   mounted() {
-    this.GetHistory()
+    if(typeof(this.$route.params.page) != "undefined" && this.$route.params.page !== null ){
+      this.Page = this.$route.params.page
+    }
+
+    this.GetHistory(this.Page)
   },
   methods: {
     GetHistory(page = 1) {
@@ -128,7 +132,6 @@ export default {
         this.Data = p.data
         this.Pagination = r.data.data
         this.IsLastPage = p.current_page == p.last_page
-        // this.PreparePagination(p)
       }).catch(e => console.log(e))
           .finally(() => this.Waiting = false)
     },
