@@ -25,14 +25,18 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->call('App\Http\Controllers\Entities\EntitiesUpdateController@checkBDforErrors')
-             ->name('transfer')
-//             ->everyFifteenMinutes();
-             ->everyTwoMinutes();
+        $schedule->call('App\Http\Controllers\Entities\EntitiesUpdateController@checkBDforErrors')
+            ->name('transfer')
+            ->everyFifteenMinutes();
+//            ->everyTwoMinutes();
 
         $schedule->call('App\Http\Controllers\VerifiedUserController@store')
             ->name('transfer.users')
             ->everyThreeHours();
+
+//        $schedule->call('App\Http\Controllers\UtilityController@CacheRefresh')
+//            ->name('transfer.cache.refresh')
+//            ->daily();
     }
 
     /**

@@ -17,8 +17,9 @@
                   :style="{'color' : props.option.active ? '#030303' : '#ff0000'}">{{ props.option.text }}</span>
           </template>
           <template slot="tag" slot-scope="{ option, remove }">
-            <span class="multiselect__tag" :style="{'background' : option.active ? '#41b883' : '#ff0000'}"><span>{{option.text }}</span>
-            <span class="multiselect__tag-icon" @click="remove(option)"></span>
+            <span class="multiselect__tag" :style="{'background' : option.active ? '#41b883' : '#ff0000'}">
+              <span>{{option.text }}</span>
+              <span class="multiselect__tag-icon" @click="remove(option)"></span>
             </span>
           </template>
         </multiselect>
@@ -473,6 +474,9 @@
       <button @click.prevent="StoreSettings" type="submit" class="btn btn-primary mt-3">
         Подтвердить выбор
       </button>
+      <button @click.prevent="CacheRefresh" :disabled="cache_refreshing" class="btn btn-secondary mt-3">
+        Обновить кеш
+      </button>
     </div>
   </div>
 </template>
@@ -530,6 +534,7 @@ export default {
         {text: 'Любые', name: 'null'},
       ],
       isLeadHot: String('null'),
+      cache_refreshing: Boolean(false),
     }
   },
 
@@ -580,8 +585,8 @@ export default {
         'newSalesDepartment': this.salesDepartmentsChange,
         'fromDate': this.fromDate,
         'toDate': this.toDate,
-      }).then(() => {
-        Vue.$toast("Передача запущена", {
+      }).then(r => {
+        Vue.$toast(`Передача запущена, ${r.data.data} в очереди`, {
           timeout: 2000
         });
       }).catch(e => {
@@ -590,6 +595,18 @@ export default {
           timeout: 2000
         });
       });
+    },
+    CacheRefresh() {
+      this.cache_refreshing = true
+      Vue.$toast("Запущено обновление кеша, \nожидайте завершения процесса", {timeout: 2000})
+
+      axios.post('/api/cache/refresh').then(res => {
+        let message = res == []
+          ? "Не удалось обновить кеш, \nперезагрузите страницу или \nобратитесь к администратору"
+          : "Кеш успешно обновлён"
+        Vue.$toast(message, {timeout: 2000})
+      }).catch(console.error)
+      .finally(() => this.cache_refreshing = false)
     },
   },
 

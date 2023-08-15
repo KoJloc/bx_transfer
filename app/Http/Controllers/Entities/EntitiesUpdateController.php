@@ -38,6 +38,8 @@ class EntitiesUpdateController extends Controller
 //--------------------------------------------------------------------------------------------------------------------//
     public function update($entitiesByEmployerId, $toUsers, $newSource, $newSalesDepartment, $filtered)
     {
+        set_time_limit(0);
+
         $counterEntities = 0;
         $counterLeads = 0;
         $counterDeals = 0;

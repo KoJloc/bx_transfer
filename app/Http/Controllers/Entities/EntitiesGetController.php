@@ -17,14 +17,18 @@ class EntitiesGetController extends Controller
         parent::__construct();
     }
 
-    public function vueRequestProcess(Request $request){
+    public function vueRequestProcess(Request $request) {
         $params = [];
 
         $data = $request->all();
 
         info($data);
 
-        if(empty($data['departments']) || empty($data['onlyActiveDepartments'])) return 'error';
+        if(empty($data['departments']) || empty($data['onlyActiveDepartments'])) {
+            return response()->json([
+                'data' => 'error'
+            ]);
+        }
 
         foreach ($data['departments'] as $employee) {
             $fromUsers[] = $employee['id'];
@@ -42,6 +46,10 @@ class EntitiesGetController extends Controller
             }
         }
         ProceedGetFiltredEntities::dispatch($response, $params, $fromUsers, $toUsers);
+        
+        return response()->json([
+            'data' => \Queue::size()
+        ]);
     }
 
     public function set($request, $fromUsers, $toUsers)

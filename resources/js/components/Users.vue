@@ -138,7 +138,7 @@ export default {
           .finally(() => this.Waiting = false)
     },
     VerifyUser(id, verified) {
-      axios.post('https://transfer-test.stepan.sms19.ru/api/users/verify', {
+      axios.post('https://transfer.stepan.sms19.ru/api/users/verify', {
         'id': id,
         'verified': verified
       }).catch(e => console.log(e))

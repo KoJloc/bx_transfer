@@ -4,12 +4,12 @@
       <div class="px-3 py-2 bg-dark text-white">
         <div class="container">
           <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-			<router-link :to="{ name: 'entities.index' }" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white fs-4 fw-bold">
+			      <router-link :to="{ name: 'entities.index' }" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white fs-4 fw-bold">
               <svg class="bi me-2" width="64" height="32" role="img" aria-label="Bootstrap">
                 <use xlink:href="#bootstrap"/>
               </svg>
               TRANSFER
-			</router-link>
+			      </router-link>
 			
             <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
               <li>
@@ -64,9 +64,7 @@ export default {
     this.getToken()
   },
 
-
   methods: {
-
     getToken() {
       this.token = localStorage.getItem('x_xsrf_token')
     },

@@ -78,7 +78,7 @@ class VerifiedUserController extends Controller
      */
     public function update(Request $request)
     {
-        VerifiedUser::whereId($request->id)->update(['verified' => $request->verified]);
+        return VerifiedUser::whereId($request->id)->update(['verified' => $request->verified]);
     }
 
     /**

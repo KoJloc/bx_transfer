@@ -9,6 +9,7 @@ use App\Http\Controllers\History\HistoryController;
 use App\Http\Controllers\History\ShowController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\IndexController;
+use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VerifiedUserController;
 use App\Models\User;
@@ -48,9 +49,10 @@ Route::middleware('auth:sanctum')->post('/user', function (Request $request) {
 //});
 
 Route::post('/index', [IndexController::class, '__invoke']);
+Route::post('/transfer/install', [InstallController::class, 'install']);
+Route::post('/cache/refresh', [UtilityController::class, 'CacheRefresh']);
 
 // API с приложения Никитоса
-Route::post('/transfer/install', [InstallController::class, 'install']);
 Route::post('/transfer/user', [ApiUserController::class, 'get']);
 Route::post('/transfer/rollback', [EntitiesRollbackController::class, 'get']);
 Route::post('/transfer/message/test', [EntitiesUpdateController::class, 'generateTransferMessageTest']);
@@ -58,7 +60,7 @@ Route::post('/transfer/error/retry', [EntitiesUpdateController::class, 'checkBDf
 
 // API для внутренней работы с VUE
 Route::group(['namespace' => 'Entities', 'prefix' => 'entities'], function () {
-    Route::post('/', [UserController::class, '__invoke']);
+    Route::post('/', [UserController::class, 'index']);
     Route::post('/params/set', [EntitiesGetController::class, 'vueRequestProcess']);
 });
 
@@ -72,8 +74,6 @@ Route::post('/users/verify', [VerifiedUserController::class, 'update']);
 Route::post('/dashboard/dates', [DashboardController::class, 'dates']);
 Route::post('/dashboard/types', [DashboardController::class, 'types']);
 Route::post('/dashboard/counts', [DashboardController::class, 'transfer_count']);
-
-
 
 Route::post('/emp_string_test', [EntitiesUpdateController::class, 'generateEmployersStringToMessagesTest']);
 
